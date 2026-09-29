@@ -1,0 +1,76 @@
+# ==============================================================================
+# MOTORSPORT INCIDENT INTELLIGENCE — GITIGNORE
+# ==============================================================================
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build and Production Artifacts
+dist/
+build/
+out/
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Linters
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Databases and Local SQLite
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sqlite-journal
+
+# Local Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# OS and Machine Local Files
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*~
+
+# IDEs and Machine-Local Configurations
+.vscode/
+.idea/
+.antigravity/
+
+# Media & Heavy Binary Assets (Motorsport Broadcast Footage)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# Telemetry and Ingestion Caches
+data/cache/
+backend/data/cache/
+
+# Backups & Scratch Files
+backups/
+*.bak
+scratch/

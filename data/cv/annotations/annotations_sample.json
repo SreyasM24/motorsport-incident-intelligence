@@ -1,0 +1,162 @@
+{
+  "annotationVersion": "1.0",
+  "coordinateFormatDefault": "NORMALIZED_0_1",
+  "annotations": [
+    {
+      "annotationId": "ANN-001-A",
+      "frameId": "frame_0001",
+      "objectId": "OBJ-CAR-01",
+      "className": "vehicle",
+      "coordinateFormat": "NORMALIZED_0_1",
+      "boundingBox": {
+        "xMin": 0.20,
+        "yMin": 0.50,
+        "xMax": 0.35,
+        "yMax": 0.65
+      },
+      "pixelCoords": {
+        "x": 384,
+        "y": 540,
+        "w": 288,
+        "h": 162
+      },
+      "visibility": "IN_FRAME",
+      "occlusion": 0.0,
+      "source": "SYNTHETIC_GROUND_TRUTH",
+      "provenanceType": "GROUND_TRUTH",
+      "trackId": "GT-TRK-01",
+      "identityLabel": "MAG",
+      "identityStatus": "CONFIRMED"
+    },
+    {
+      "annotationId": "ANN-001-B",
+      "frameId": "frame_0001",
+      "objectId": "OBJ-CAR-02",
+      "className": "vehicle",
+      "coordinateFormat": "NORMALIZED_0_1",
+      "boundingBox": {
+        "xMin": 0.45,
+        "yMin": 0.48,
+        "xMax": 0.60,
+        "yMax": 0.64
+      },
+      "pixelCoords": {
+        "x": 864,
+        "y": 518,
+        "w": 288,
+        "h": 173
+      },
+      "visibility": "IN_FRAME",
+      "occlusion": 0.0,
+      "source": "SYNTHETIC_GROUND_TRUTH",
+      "provenanceType": "GROUND_TRUTH",
+      "trackId": "GT-TRK-02",
+      "identityLabel": "GAS",
+      "identityStatus": "CONFIRMED"
+    },
+    {
+      "annotationId": "ANN-030-A",
+      "frameId": "frame_0030",
+      "objectId": "OBJ-CAR-01",
+      "className": "vehicle",
+      "coordinateFormat": "NORMALIZED_0_1",
+      "boundingBox": {
+        "xMin": 0.30,
+        "yMin": 0.45,
+        "xMax": 0.46,
+        "yMax": 0.62
+      },
+      "pixelCoords": {
+        "x": 576,
+        "y": 486,
+        "w": 307,
+        "h": 184
+      },
+      "visibility": "IN_FRAME",
+      "occlusion": 0.15,
+      "source": "SYNTHETIC_GROUND_TRUTH",
+      "provenanceType": "GROUND_TRUTH",
+      "trackId": "GT-TRK-01",
+      "identityLabel": "MAG",
+      "identityStatus": "CONFIRMED"
+    },
+    {
+      "annotationId": "ANN-030-B",
+      "frameId": "frame_0030",
+      "objectId": "OBJ-CAR-02",
+      "className": "vehicle",
+      "coordinateFormat": "NORMALIZED_0_1",
+      "boundingBox": {
+        "xMin": 0.42,
+        "yMin": 0.46,
+        "xMax": 0.58,
+        "yMax": 0.63
+      },
+      "pixelCoords": {
+        "x": 806,
+        "y": 497,
+        "w": 307,
+        "h": 184
+      },
+      "visibility": "IN_FRAME",
+      "occlusion": 0.15,
+      "source": "SYNTHETIC_GROUND_TRUTH",
+      "provenanceType": "GROUND_TRUTH",
+      "trackId": "GT-TRK-02",
+      "identityLabel": "GAS",
+      "identityStatus": "CONFIRMED"
+    },
+    {
+      "annotationId": "ANN-060-A",
+      "frameId": "frame_0060",
+      "objectId": "OBJ-CAR-01",
+      "className": "vehicle",
+      "coordinateFormat": "NORMALIZED_0_1",
+      "boundingBox": {
+        "xMin": 0.25,
+        "yMin": 0.40,
+        "xMax": 0.40,
+        "yMax": 0.55
+      },
+      "pixelCoords": {
+        "x": 480,
+        "y": 432,
+        "w": 288,
+        "h": 162
+      },
+      "visibility": "IN_FRAME",
+      "occlusion": 0.0,
+      "source": "SYNTHETIC_GROUND_TRUTH",
+      "provenanceType": "GROUND_TRUTH",
+      "trackId": "GT-TRK-01",
+      "identityLabel": "MAG",
+      "identityStatus": "CONFIRMED"
+    },
+    {
+      "annotationId": "ANN-060-B",
+      "frameId": "frame_0060",
+      "objectId": "OBJ-CAR-02",
+      "className": "vehicle",
+      "coordinateFormat": "NORMALIZED_0_1",
+      "boundingBox": {
+        "xMin": 0.50,
+        "yMin": 0.42,
+        "xMax": 0.65,
+        "yMax": 0.57
+      },
+      "pixelCoords": {
+        "x": 960,
+        "y": 454,
+        "w": 288,
+        "h": 162
+      },
+      "visibility": "IN_FRAME",
+      "occlusion": 0.0,
+      "source": "SYNTHETIC_GROUND_TRUTH",
+      "provenanceType": "GROUND_TRUTH",
+      "trackId": "GT-TRK-02",
+      "identityLabel": "GAS",
+      "identityStatus": "CONFIRMED"
+    }
+  ]
+}

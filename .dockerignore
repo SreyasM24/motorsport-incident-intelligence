@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.pytest_cache
+backend/data/cache
+backend/.pytest_cache
+*.log
+test_*.db
+*.mp4
+.vscode
+.antigravity

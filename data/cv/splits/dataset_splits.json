@@ -1,0 +1,44 @@
+{
+  "splitVersion": "1.0",
+  "splitStrategy": "GROUP_BASED_SESSION_CAMERA",
+  "groupKey": "session_or_video_id",
+  "leakageProtectionRule": "Adjacent frames from identical video sessions and camera views are strictly kept within the same partition. No random frame-level shuffling.",
+  "splits": {
+    "train": {
+      "groupCount": 2,
+      "sampleCount": 2,
+      "groups": [
+        "synthetic_session_01_cam1",
+        "synthetic_session_02_cam2"
+      ],
+      "sampleIds": [
+        "SMP-FIXTURE-001",
+        "SMP-FIXTURE-030"
+      ]
+    },
+    "val": {
+      "groupCount": 1,
+      "sampleCount": 1,
+      "groups": [
+        "synthetic_session_03_cam1"
+      ],
+      "sampleIds": [
+        "SMP-FIXTURE-060"
+      ]
+    },
+    "test": {
+      "groupCount": 1,
+      "sampleCount": 1,
+      "groups": [
+        "synthetic_session_04_apex"
+      ],
+      "sampleIds": [
+        "SMP-FIXTURE-060"
+      ]
+    }
+  },
+  "realDataStatus": {
+    "status": "INSUFFICIENT_DATA",
+    "description": "Zero real broadcast video samples available for training or evaluation. Real dataset splits cannot be materialized."
+  }
+}
