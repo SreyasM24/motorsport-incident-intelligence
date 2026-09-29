@@ -65,6 +65,42 @@ class BenchmarkService:
         """Find empirically comparable historical incidents based on observable features."""
         return self.comparator.find_comparable_incidents(query_case_id=case_id, top_k=top_k)
 
+    def get_provenance_matrix(self):
+        """Return the authoritative ground-truth vs system independence audit matrix."""
+        return self.evaluator.audit_metric_provenance()
+
+    def get_group_splits(self, split_type: str = "circuit") -> Dict[str, Any]:
+        """Generate leakage-free cross-validation splits by circuit, season, or event."""
+        from app.benchmark.manifest import (
+            leave_one_circuit_out_splits,
+            leave_one_season_out_splits,
+            leave_one_event_out_splits,
+        )
+        if split_type == "season":
+            raw_splits = leave_one_season_out_splits(self.manifest, verified_only=True)
+        elif split_type == "event":
+            raw_splits = leave_one_event_out_splits(self.manifest, verified_only=True)
+        else:
+            raw_splits = leave_one_circuit_out_splits(self.manifest, verified_only=True)
+
+        serialized: Dict[str, Any] = {}
+        for key, fold in raw_splits.items():
+            serialized[key] = {
+                "trainCount": len(fold["train"]),
+                "testCount": len(fold["test"]),
+                "trainCaseIds": [c.case_id for c in fold["train"]],
+                "testCaseIds": [c.case_id for c in fold["test"]],
+            }
+        return serialized
+
+    def evaluate_comparator(self, top_k: int = 3):
+        """Evaluate observable physical similarity and feature isolation of comparator."""
+        return self.comparator.evaluate_observable_similarity(top_k=top_k)
+
+    def audit_comparator_isolation(self) -> Dict[str, Any]:
+        """Audit that comparator scoring is strictly isolated from historical penalties."""
+        return self.comparator.audit_feature_isolation()
+
 
 _benchmark_service_instance: Optional[BenchmarkService] = None
 

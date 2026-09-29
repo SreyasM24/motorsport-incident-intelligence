@@ -20,6 +20,15 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 
+class GroundTruthProvenance(str, Enum):
+    """Provenance origin of benchmark ground truth."""
+    OFFICIAL_DOCUMENT = "OFFICIAL_DOCUMENT"
+    INDEPENDENT_TELEMETRY = "INDEPENDENT_TELEMETRY"
+    INDEPENDENT_ANNOTATION = "INDEPENDENT_ANNOTATION"
+    DERIVED_FROM_SAME_TELEMETRY = "DERIVED_FROM_SAME_TELEMETRY"
+    UNKNOWN = "UNKNOWN"
+
+
 class InteractionCategory(str, Enum):
     """Observable interaction categories supported by empirical evidence."""
     FORCING_OFF_TRACK = "FORCING_OFF_TRACK"
@@ -71,6 +80,7 @@ class SplitGroup(BaseModel):
     event: str
     session: str
     driver_pair: str
+    season: Optional[int] = None
 
 
 class DocumentedStewardOutcome(BaseModel):
@@ -128,6 +138,7 @@ class HistoricalIncidentCase(BaseModel):
     telemetry_availability: EvidenceAvailability = EvidenceAvailability.AVAILABLE
     regulation_availability: EvidenceAvailability = EvidenceAvailability.AVAILABLE
     ground_truth_type: GroundTruthType
+    ground_truth_provenance: GroundTruthProvenance = GroundTruthProvenance.DERIVED_FROM_SAME_TELEMETRY
     verification_status: VerificationStatus
     interaction_category: InteractionCategory
     is_control_case: bool = False
@@ -195,6 +206,63 @@ def split_manifest_by_group(
     """Partition cases deterministically by a grouping dimension to prevent leakage."""
     splits: Dict[str, List[HistoricalIncidentCase]] = {}
     for case in manifest.cases:
-        key = getattr(case.split_group, group_key, case.circuit)
-        splits.setdefault(key, []).append(case)
+        key = getattr(case.split_group, group_key, getattr(case, group_key, case.circuit))
+        splits.setdefault(str(key), []).append(case)
+    return splits
+
+
+def leave_one_circuit_out_splits(
+    manifest: BenchmarkManifest,
+    verified_only: bool = True,
+) -> Dict[str, Dict[str, List[HistoricalIncidentCase]]]:
+    """Generate Leave-One-Circuit-Out partitions ensuring zero cross-circuit data leakage."""
+    pool = get_verified_cases(manifest) if verified_only else manifest.cases
+    circuits = sorted(list(set(c.circuit for c in pool)))
+    splits: Dict[str, Dict[str, List[HistoricalIncidentCase]]] = {}
+
+    for holdout_circuit in circuits:
+        train_cases = [c for c in pool if c.circuit != holdout_circuit]
+        test_cases = [c for c in pool if c.circuit == holdout_circuit]
+        splits[holdout_circuit] = {
+            "train": train_cases,
+            "test": test_cases,
+        }
+    return splits
+
+
+def leave_one_season_out_splits(
+    manifest: BenchmarkManifest,
+    verified_only: bool = True,
+) -> Dict[str, Dict[str, List[HistoricalIncidentCase]]]:
+    """Generate Leave-One-Season-Out partitions ensuring zero temporal/year-level leakage."""
+    pool = get_verified_cases(manifest) if verified_only else manifest.cases
+    seasons = sorted(list(set(c.season for c in pool)))
+    splits: Dict[str, Dict[str, List[HistoricalIncidentCase]]] = {}
+
+    for holdout_season in seasons:
+        train_cases = [c for c in pool if c.season != holdout_season]
+        test_cases = [c for c in pool if c.season == holdout_season]
+        splits[str(holdout_season)] = {
+            "train": train_cases,
+            "test": test_cases,
+        }
+    return splits
+
+
+def leave_one_event_out_splits(
+    manifest: BenchmarkManifest,
+    verified_only: bool = True,
+) -> Dict[str, Dict[str, List[HistoricalIncidentCase]]]:
+    """Generate Leave-One-Event-Out partitions ensuring zero Grand Prix session leakage."""
+    pool = get_verified_cases(manifest) if verified_only else manifest.cases
+    events = sorted(list(set(c.split_group.event for c in pool)))
+    splits: Dict[str, Dict[str, List[HistoricalIncidentCase]]] = {}
+
+    for holdout_event in events:
+        train_cases = [c for c in pool if c.split_group.event != holdout_event]
+        test_cases = [c for c in pool if c.split_group.event == holdout_event]
+        splits[holdout_event] = {
+            "train": train_cases,
+            "test": test_cases,
+        }
     return splits

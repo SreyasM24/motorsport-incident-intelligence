@@ -63,7 +63,7 @@ def evaluator(manifest: BenchmarkManifest) -> HistoricalReconstructionEvaluator:
 
 def test_manifest_loads_and_validates(manifest: BenchmarkManifest):
     """Verify that the benchmark manifest loads, parses, and satisfies all schema rules."""
-    assert manifest.benchmark_version == "1.0.0"
+    assert manifest.benchmark_version.startswith("1.")
     assert len(manifest.cases) >= 8
     assert manifest.tolerances.timestamp_absolute_error_seconds == 2.0
     assert manifest.tolerances.window_iou_threshold == 0.50
@@ -366,7 +366,7 @@ def test_api_benchmark_report_endpoint(client: TestClient):
     res = client.get("/api/v1/analysis/benchmark/historical-incidents")
     assert res.status_code == 200
     data = res.json()
-    assert data["benchmarkVersion"] == "1.0.0"
+    assert data["benchmarkVersion"].startswith("1.")
     assert data["totalCases"] >= 8
     assert data["verifiedCases"] >= 7
     assert "circuitsEvaluated" in data

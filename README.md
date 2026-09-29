@@ -105,12 +105,15 @@ flowchart TD
 
 ## 5. Real-World Validated Incident Case Studies
 
-MII has been benchmarked and cross-validated against real-world Formula One race incidents:
+MII has been benchmarked and cross-validated across **30 verified historical Formula One incidents and controls** spanning **8 circuits** and **2 seasons (2023–2024)**, evaluating evidence reconstruction quality without autonomous fault or penalty predictions:
 
-| Grand Prix | Lap | Turn | Involved Drivers | Regulatory Context | Key Quantified Metrics |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **2024 Italian GP** | Lap 15 | T8–T9 (Variante Ascari) | D. Ricciardo vs N. Hülkenberg | ISC Appendix L Ch IV Art 2(b) | $\Delta \text{Apex Lateral Clearance} = 0.42\text{m}$, Braking delta $+12\text{m}$ late vs reference |
-| **2024 Austrian GP** | Lap 64 | T3 (Remus) | M. Verstappen vs L. Norris | Driving Standards / Crowding | Divergence in lateral line: $1.8\text{m}$ inward shift under braking, $0.18\text{s}$ reaction window |
+| Grand Prix | Season | Lap | Turn | Involved Drivers | Regulatory Context | Key Quantified Metrics |
+| :--- | :---: | :---: | :--- | :--- | :--- | :--- |
+| **2024 Italian GP** | 2024 | Lap 15 | T8–T9 (Ascari) | D. Ricciardo vs N. Hülkenberg | ISC Appendix L Ch IV Art 2(b) | $\Delta \text{Apex Lateral Clearance} = 0.42\text{m}$, Braking delta $+12\text{m}$ late vs reference |
+| **2024 Austrian GP** | 2024 | Lap 64 | T3 (Remus) | M. Verstappen vs L. Norris | Driving Standards / Crowding | Divergence in lateral line: $1.8\text{m}$ inward shift under braking, $0.18\text{s}$ reaction window |
+| **2024 United States GP** | 2024 | Lap 52 | T12 (Hairpin) | L. Norris vs M. Verstappen | Leaving Track & Lasting Advantage | Both cars exceeded track limits; outside pass completed on asphalt runoff |
+| **2024 Mexico City GP** | 2024 | Lap 10 | T4 (Chicane) | M. Verstappen vs L. Norris | Crowding / Forcing Off Track | Squeeze on apex entry; $0.4\text{m}$ lateral room forced outside car to grass |
+| **2023 Las Vegas GP** | 2023 | Lap 25 | T12 (Koval) | G. Russell vs M. Verstappen | Causing a Collision | Turn-in collision at apex under braking; $0.0\text{m}$ lateral gap at contact |
 
 ---
 
@@ -250,6 +253,9 @@ Detailed architectural specifications, evaluation reports, and operational guide
 - [**API Reference**](docs/api.md): REST endpoints, OpenAPI schemas, query parameters, and error responses.
 - [**Data Provenance & Ingestion**](docs/data-provenance.md): Provenance verification, caching policies, and physics validation.
 - [**Evaluation & Benchmark Metrics**](docs/evaluation.md): Machine learning and computer vision cross-circuit validation results.
+- [**Steward Operating Workflow**](docs/steward-workflow.md): 14-step human-in-the-loop officiating procedure and jurisdictional boundary matrix.
+- [**Historical Reconstruction Benchmark**](docs/evaluation/historical_incident_benchmark_v1.md): Multi-circuit, multi-season decoupled evidence evaluation.
+- [**Benchmark Provenance Matrix**](docs/evaluation/benchmark_provenance_matrix.md): Ground truth vs. system independence audit preventing circular evaluation.
 - [**System Boundaries & Epistemic Limitations**](docs/limitations.md): Explicit operational constraints and stewardship boundaries.
 - [**Production Deployment**](docs/deployment.md): Docker architecture, database maintenance, connection pooling, and health checks.
 

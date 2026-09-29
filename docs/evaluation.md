@@ -71,22 +71,46 @@ The discrepancy engine compares physical telemetry signatures against optical tr
 
 ---
 
-## 4. Historical Incident Reconstruction Benchmark (MII-HIRB-v1)
+## 4. Historical Incident Reconstruction Benchmark (MII-HIRB-v1.1)
 
-For full architectural methodology, evaluation protocols, and per-case diagnostic breakdowns, see [**Historical Incident Reconstruction Benchmark Report**](evaluation/historical_incident_benchmark_v1.md).
+For full architectural methodology, evaluation protocols, group-aware cross-validation, and per-case diagnostic breakdowns, see:
+- [**Historical Incident Reconstruction Benchmark Report**](evaluation/historical_incident_benchmark_v1.md)
+- [**Benchmark Provenance & Metric Grounding Matrix**](evaluation/benchmark_provenance_matrix.md)
 
 ### Objective
-Evaluates MII's evidence reconstruction quality against curated real-world Formula 1 incidents and nominal racing controls without predicting driver fault, guilt, or sporting penalties.
+Evaluates MII's evidence reconstruction quality, provenance integrity, and cross-circuit generalization against curated real-world Formula 1 incidents and nominal racing controls without predicting driver fault, guilt, or sporting penalties.
 
-### Key Suite Metrics (Verified Cohort)
-- **Manifest**: 9 curated cases (8 verified + 1 unverified control strictly excluded from quantitative scoring).
-- **Circuits Evaluated**: Autodromo Nazionale Monza, Red Bull Ring.
-- **Timestamp Accuracy ($\le \pm 2.0\text{s}$)**: **100.0%** ($MAE = 0.00\text{s}$, Mean IoU = 1.00).
-- **Vehicle Association Accuracy**: **100.0%** (Mean $F1 = 1.00$).
-- **Spatial Kinematic Plausibility**: **100.0%** pass rate across all physical checks.
-- **Reference Lap Baseline Validity**: **75.0%** (Honest: Lap 1 incidents correctly designate `INSUFFICIENT_REFERENCE_DATA`).
-- **Regulatory Retrieval Recall & Precision**: **100.0%** recall, **100.0%** precision, **100.0%** documentary purity.
-- **Epistemic Integrity Compliance**: **100.0%** pass rate (zero illegal type upgrades).
-- **Lineage Double-Counting Audit**: Mean naive metrics (4.00) collapsed to mean root independent sources (2.00).
-- **Cross-Modal Consistency**: **100.0%** valid alignment (5 LOW technical discrepancies, 3 NONE).
+### Key Suite Metrics (Expanded Cohort: N = 30 Verified Cases)
+- **Manifest**: 32 curated cases (30 verified + 2 unverified controls strictly excluded from quantitative scoring).
+- **Circuits Evaluated (8)**: Autódromo Hermanos Rodríguez, Circuit of the Americas, Las Vegas Strip Circuit, Losail International Circuit, Monza, Red Bull Ring, Spa-Francorchamps, Yas Marina Circuit.
+- **Seasons Evaluated (2)**: 2023 Season (8 cases) and 2024 Season (22 cases).
+- **Temporal Alignment (Consistency)**: **100.0%** ($MAE = 0.00\text{s}$, Mean IoU = 1.00). Reclassified from independent accuracy to telemetry consistency check.
+- **Vehicle Association (Propagation)**: **100.0%** (Mean $F1 = 1.00$). Independent visual identity marked `INSUFFICIENT_DATA`.
+- **Spatial Kinematic Consistency**: **100.0%** pass rate across all physical boundaries.
+- **Reference Lap Baseline Validity**: **93.3%** (Honest: stint-opening incidents correctly designate `INSUFFICIENT_REFERENCE_DATA`).
+- **Regulatory Retrieval (Independent)**: **100.0%** recall, **100.0%** precision, **100.0%** documentary purity.
+- **Epistemic Integrity Compliance (Independent)**: **100.0%** pass rate (zero illegal type upgrades).
+- **Lineage Double-Counting Audit (Independent)**: Mean naive metrics (4.00) collapsed to mean root independent sources (2.00).
+- **Cross-Modal Consistency**: **100.0%** valid alignment across all verified cases.
+- **Historical Case Comparator**: **91.1%** category congruence, $0.49\text{m}$ mean gap proximity error, **100% non-precedent isolation**.
+
+---
+
+## 5. Benchmark Provenance & Independence Matrix
+
+To prevent circular evaluation, every benchmark dimension is formally classified according to its ground truth source and computational pathway:
+
+| Dimension | Classification | Independent? | Circularity Resolution |
+| :--- | :--- | :---: | :--- |
+| **Temporal Alignment** | `TELEMETRY_CONSISTENCY_CHECK` | No | Reclassified: verifies clock synchronization without drift. |
+| **Vehicle Association** | `TELEMETRY_CONSISTENCY_CHECK` | No | Reclassified: identifier propagation only; visual ID = `INSUFFICIENT_DATA`. |
+| **Spatial Plausibility** | `TELEMETRY_CONSISTENCY_CHECK` | No | Reclassified: confirms physical kinematics within vehicle limits. |
+| **Baseline Selection** | `INDEPENDENT_EVALUATION` | Yes | Independent deterministic rule validation against official session logs. |
+| **Regulation Retrieval** | `INDEPENDENT_EVALUATION` | Yes | Semantic text retrieval evaluated against official Sporting Code citations. |
+| **Epistemic Typing** | `INDEPENDENT_EVALUATION` | Yes | Architectural safety audit asserting 0 illegal type upgrades. |
+| **Lineage Tracking** | `INDEPENDENT_EVALUATION` | Yes | Independent DAG deduplication of physical sensor origins. |
+| **Visual Evidence** | `INSUFFICIENT_DATA` | Yes | Honestly categorized without synthetic ground truth fabrication. |
+
+*Full analysis available in [`docs/evaluation/benchmark_provenance_matrix.md`](evaluation/benchmark_provenance_matrix.md).*
+
 

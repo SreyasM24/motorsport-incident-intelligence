@@ -1,18 +1,29 @@
 {
-  "benchmark_version": "1.0.0",
-  "name": "Historical Motorsport Incident Reconstruction Benchmark (MII-HIRB-v1)",
-  "description": "Curated benchmark evaluating multi-modal evidence reconstruction quality across verified real-world Formula 1 incidents and nominal racing controls without predicting driver fault, guilt, or sporting penalties.",
+  "benchmark_version": "1.1.0",
+  "name": "Historical Motorsport Incident Reconstruction Benchmark (MII-HIRB-v1.1)",
+  "description": "Expanded multi-circuit, multi-season benchmark evaluating multi-modal evidence reconstruction quality across verified real-world Formula 1 incidents and nominal racing controls without predicting driver fault, guilt, or sporting penalties.",
   "epistemic_framework": {
     "core_principle": "EVIDENCE RECONSTRUCTION QUALITY ONLY - NO FAULT OR PENALTY PREDICTION",
-    "taxonomy": ["OBSERVED", "DERIVED", "MODEL_DERIVED", "DOCUMENTARY", "UNAVAILABLE"],
+    "taxonomy": [
+      "OBSERVED",
+      "DERIVED",
+      "MODEL_DERIVED",
+      "DOCUMENTARY",
+      "UNAVAILABLE"
+    ],
     "steward_decisions_role": "DOCUMENTARY context only, never physical ground truth or training labels for guilt",
-    "double_counting_prevention": "Root observation lineage tracking via LineageTracker"
+    "double_counting_prevention": "Root observation lineage tracking via LineageTracker",
+    "provenance_standards": {
+      "OFFICIAL_DOCUMENT": "FIA Stewards Decisions, Race Control messages, official classifications",
+      "DERIVED_FROM_SAME_TELEMETRY": "Shared ECU/CAN-bus telemetry channel (classified as consistency check, not independent measurement)",
+      "INSUFFICIENT_DATA": "Data stream is unavailable under copyright or licensing without synthetic fabrication"
+    }
   },
   "tolerances": {
     "timestamp_absolute_error_seconds": 2.0,
-    "window_iou_threshold": 0.50,
-    "video_sync_offset_tolerance_seconds": 0.20,
-    "spatial_gap_tolerance_meters": 0.50,
+    "window_iou_threshold": 0.5,
+    "video_sync_offset_tolerance_seconds": 0.2,
+    "spatial_gap_tolerance_meters": 0.5,
     "minimum_reference_laps": 3
   },
   "cases": [
@@ -38,11 +49,16 @@
       "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Italian%20Grand%20Prix",
       "document_identifier": "DOC-41-2024-ITA-CAR3",
       "documented_incident_description": "Car 3 moved to the left under braking for Turn 8 and squeezed Car 27 off the racing track on corner approach/entry.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS", "FIA Steward Decisions"],
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "AVAILABLE",
       "regulation_availability": "AVAILABLE",
       "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
       "verification_status": "VERIFIED",
       "interaction_category": "FORCING_OFF_TRACK",
       "is_control_case": false,
@@ -50,7 +66,8 @@
         "circuit": "Monza",
         "event": "Italian_GP_2024",
         "session": "Race",
-        "driver_pair": "RIC-HUL"
+        "driver_pair": "RIC-HUL",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "PENALTY_APPLIED",
@@ -59,63 +76,23 @@
         "adjudicative_note": "Documentary record of historical officiating outcome; does not serve as automated training label or physical causality."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["RIC", "HUL"],
+        "driver_pair": [
+          "RIC",
+          "HUL"
+        ],
         "primary_turn": "Turn 8",
-        "minimum_gap_meters_range": [0.20, 1.20],
-        "delta_brake_meters_range": [8.0, 16.0],
-        "expected_relevant_articles": ["Article 33.4", "Appendix L Ch IV Art 2(b)"],
-        "reference_baseline_status": "AVAILABLE",
-        "expected_discrepancy_severity": "LOW"
-      }
-    },
-    {
-      "case_id": "HIST-2024-AUT-R-01",
-      "series": "Formula 1",
-      "season": 2024,
-      "event": "Austrian Grand Prix",
-      "session": "Race",
-      "lap": 64,
-      "driver_a": "VER",
-      "driver_b": "NOR",
-      "incident_timestamp": "2024-06-30T14:48:19.200Z",
-      "incident_window": {
-        "start_time": "2024-06-30T14:48:16.500Z",
-        "end_time": "2024-06-30T14:48:22.000Z",
-        "peak_time": "2024-06-30T14:48:19.200Z",
-        "duration_seconds": 5.5
-      },
-      "circuit": "Red Bull Ring",
-      "corner": "T3 (Remus)",
-      "official_document": "FIA Document 66 - Offence - Car 1 - Causing a collision with Car 4",
-      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Austrian%20Grand%20Prix",
-      "document_identifier": "DOC-66-2024-AUT-CAR1",
-      "documented_incident_description": "Car 1 moved to the left on corner approach under braking for Turn 3, leading to physical wheel contact with Car 4 on the outside.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS", "FIA Steward Decisions"],
-      "video_availability": "UNAVAILABLE",
-      "telemetry_availability": "AVAILABLE",
-      "regulation_availability": "AVAILABLE",
-      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
-      "verification_status": "VERIFIED",
-      "interaction_category": "CONTACT_COLLISION",
-      "is_control_case": false,
-      "split_group": {
-        "circuit": "Red Bull Ring",
-        "event": "Austrian_GP_2024",
-        "session": "Race",
-        "driver_pair": "VER-NOR"
-      },
-      "documented_steward_outcome": {
-        "decision_type": "PENALTY_APPLIED",
-        "description": "10-second time penalty and 2 penalty points assigned to Car 1 for breach of ISC Appendix L Ch IV Art 2(d).",
-        "epistemic_classification": "DOCUMENTARY",
-        "adjudicative_note": "Documentary record of historical officiating outcome; does not serve as automated training label or physical causality."
-      },
-      "expected_reconstruction_targets": {
-        "driver_pair": ["VER", "NOR"],
-        "primary_turn": "Turn 3",
-        "minimum_gap_meters_range": [0.0, 0.50],
-        "delta_brake_meters_range": [-5.0, 5.0],
-        "expected_relevant_articles": ["Article 33.4", "Appendix L Ch IV Art 2(d)"],
+        "minimum_gap_meters_range": [
+          0.2,
+          1.2
+        ],
+        "delta_brake_meters_range": [
+          8.0,
+          16.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(b)"
+        ],
         "reference_baseline_status": "AVAILABLE",
         "expected_discrepancy_severity": "LOW"
       }
@@ -142,11 +119,16 @@
       "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Italian%20Grand%20Prix",
       "document_identifier": "DOC-39-2024-ITA-CAR27",
       "documented_incident_description": "Car 27 locked brakes into Turn 1 on Lap 1 concertina and initiated contact with Car 3 and Car 22.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS", "FIA Steward Decisions"],
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "AVAILABLE",
       "regulation_availability": "AVAILABLE",
       "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
       "verification_status": "VERIFIED",
       "interaction_category": "CONTACT_COLLISION",
       "is_control_case": false,
@@ -154,7 +136,8 @@
         "circuit": "Monza",
         "event": "Italian_GP_2024",
         "session": "Race",
-        "driver_pair": "HUL-RIC"
+        "driver_pair": "HUL-RIC",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "PENALTY_APPLIED",
@@ -163,17 +146,99 @@
         "adjudicative_note": "Documentary record of historical officiating outcome; does not serve as automated training label or physical causality."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["HUL", "RIC"],
+        "driver_pair": [
+          "HUL",
+          "RIC"
+        ],
         "primary_turn": "Turn 1",
-        "minimum_gap_meters_range": [0.0, 0.80],
-        "delta_brake_meters_range": [10.0, 30.0],
-        "expected_relevant_articles": ["Article 33.4", "Appendix L Ch IV Art 2(d)"],
+        "minimum_gap_meters_range": [
+          0.0,
+          0.8
+        ],
+        "delta_brake_meters_range": [
+          10.0,
+          30.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
         "reference_baseline_status": "AVAILABLE",
         "expected_discrepancy_severity": "LOW"
       }
     },
     {
       "case_id": "HIST-2024-ITA-R-03",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Italian Grand Prix",
+      "session": "Race",
+      "lap": 19,
+      "driver_a": "MAG",
+      "driver_b": "GAS",
+      "incident_timestamp": "2024-09-01T13:34:10.200Z",
+      "incident_window": {
+        "start_time": "2024-09-01T13:34:07.500Z",
+        "end_time": "2024-09-01T13:34:13.000Z",
+        "peak_time": "2024-09-01T13:34:10.200Z",
+        "duration_seconds": 5.5
+      },
+      "circuit": "Monza",
+      "corner": "T4-T5 (Variante della Roggia)",
+      "official_document": "FIA Document 40 - Offence - Car 20 - Causing a collision with Car 10",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Italian%20Grand%20Prix",
+      "document_identifier": "DOC-40-2024-ITA-CAR20",
+      "documented_incident_description": "Car 20 locked wheels attempting an inside overtake at Turn 4, resulting in wheel contact with Car 10.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "CONTACT_COLLISION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Monza",
+        "event": "Italian_GP_2024",
+        "session": "Race",
+        "driver_pair": "MAG-GAS",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "10-second time penalty and 2 penalty points assigned to Car 20.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "MAG",
+          "GAS"
+        ],
+        "primary_turn": "Turn 4",
+        "minimum_gap_meters_range": [
+          0.0,
+          0.5
+        ],
+        "delta_brake_meters_range": [
+          10.0,
+          25.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-ITA-R-04",
       "series": "Formula 1",
       "season": 2024,
       "event": "Italian Grand Prix",
@@ -194,11 +259,16 @@
       "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Italian%20Grand%20Prix",
       "document_identifier": "RCM-2024-ITA-LAP31-T4",
       "documented_incident_description": "Car 1 attempted an inside overtake on Car 44 at Turn 4. Proximity alert triggered; Car 44 took runoff asphalt.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS", "Race Control Messages"],
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "Race Control Messages"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "AVAILABLE",
       "regulation_availability": "AVAILABLE",
       "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
       "verification_status": "VERIFIED",
       "interaction_category": "OVERTAKING_INTERACTION",
       "is_control_case": false,
@@ -206,72 +276,34 @@
         "circuit": "Monza",
         "event": "Italian_GP_2024",
         "session": "Race",
-        "driver_pair": "VER-HAM"
+        "driver_pair": "VER-HAM",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "NO_INVESTIGATION_NECESSARY",
         "description": "Race control noted Turn 4 interaction, reviewed telemetry, and determined no further action necessary.",
         "epistemic_classification": "DOCUMENTARY",
-        "adjudicative_note": "Documentary record of historical officiating outcome; does not serve as automated training label or physical causality."
+        "adjudicative_note": "Documentary record of historical officiating outcome."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["VER", "HAM"],
+        "driver_pair": [
+          "VER",
+          "HAM"
+        ],
         "primary_turn": "Turn 4",
-        "minimum_gap_meters_range": [1.20, 2.50],
-        "delta_brake_meters_range": [5.0, 15.0],
-        "expected_relevant_articles": ["Article 33.4", "Article 27.3", "Article 33.3"],
-        "reference_baseline_status": "AVAILABLE",
-        "expected_discrepancy_severity": "LOW"
-      }
-    },
-    {
-      "case_id": "HIST-2024-AUT-R-02",
-      "series": "Formula 1",
-      "season": 2024,
-      "event": "Austrian Grand Prix",
-      "session": "Race",
-      "lap": 63,
-      "driver_a": "NOR",
-      "driver_b": "VER",
-      "incident_timestamp": "2024-06-30T14:47:04.100Z",
-      "incident_window": {
-        "start_time": "2024-06-30T14:47:01.000Z",
-        "end_time": "2024-06-30T14:47:07.000Z",
-        "peak_time": "2024-06-30T14:47:04.100Z",
-        "duration_seconds": 6.0
-      },
-      "circuit": "Red Bull Ring",
-      "corner": "T3 (Remus)",
-      "official_document": "FIA Race Control Event Log - Lap 63 Turn 3 Off-Track / Track Limits",
-      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Austrian%20Grand%20Prix",
-      "document_identifier": "RCM-2024-AUT-LAP63-T3",
-      "documented_incident_description": "Car 4 made an inside dive overtake into Turn 3, locked up slightly, and exceeded track limits on exit while Car 1 retained position.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS", "Race Control Messages"],
-      "video_availability": "UNAVAILABLE",
-      "telemetry_availability": "AVAILABLE",
-      "regulation_availability": "AVAILABLE",
-      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
-      "verification_status": "VERIFIED",
-      "interaction_category": "BRAKING_APPROACH",
-      "is_control_case": false,
-      "split_group": {
-        "circuit": "Red Bull Ring",
-        "event": "Austrian_GP_2024",
-        "session": "Race",
-        "driver_pair": "NOR-VER"
-      },
-      "documented_steward_outcome": {
-        "decision_type": "TRACK_LIMITS_STRIKE",
-        "description": "Car 4 assigned track limits strike (exceeding track limits at Turn 3). Position handed back immediately.",
-        "epistemic_classification": "DOCUMENTARY",
-        "adjudicative_note": "Documentary record of historical officiating outcome; does not serve as automated training label or physical causality."
-      },
-      "expected_reconstruction_targets": {
-        "driver_pair": ["NOR", "VER"],
-        "primary_turn": "Turn 3",
-        "minimum_gap_meters_range": [0.80, 2.00],
-        "delta_brake_meters_range": [15.0, 30.0],
-        "expected_relevant_articles": ["Article 27.3", "Article 33.3"],
+        "minimum_gap_meters_range": [
+          1.2,
+          2.5
+        ],
+        "delta_brake_meters_range": [
+          5.0,
+          15.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Article 27.3",
+          "Article 33.3"
+        ],
         "reference_baseline_status": "AVAILABLE",
         "expected_discrepancy_severity": "LOW"
       }
@@ -298,11 +330,15 @@
       "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Italian%20Grand%20Prix",
       "document_identifier": "CTRL-2024-ITA-L36",
       "documented_incident_description": "Clean, fully compliant racing pass between teammates at Roggia chicane. No off-track, crowding, or contact.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS"],
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "AVAILABLE",
       "regulation_availability": "AVAILABLE",
       "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
       "verification_status": "VERIFIED",
       "interaction_category": "NOMINAL_RACING_CONTROL",
       "is_control_case": true,
@@ -310,7 +346,8 @@
         "circuit": "Monza",
         "event": "Italian_GP_2024",
         "session": "Race",
-        "driver_pair": "NOR-PIA"
+        "driver_pair": "NOR-PIA",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "NO_INVESTIGATION_NECESSARY",
@@ -319,11 +356,22 @@
         "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["NOR", "PIA"],
+        "driver_pair": [
+          "NOR",
+          "PIA"
+        ],
         "primary_turn": "Turn 4",
-        "minimum_gap_meters_range": [2.50, 4.50],
-        "delta_brake_meters_range": [-3.0, 3.0],
-        "expected_relevant_articles": ["Article 33.3"],
+        "minimum_gap_meters_range": [
+          2.5,
+          4.5
+        ],
+        "delta_brake_meters_range": [
+          -3.0,
+          3.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
         "reference_baseline_status": "AVAILABLE",
         "expected_discrepancy_severity": "NONE"
       }
@@ -350,11 +398,15 @@
       "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Italian%20Grand%20Prix",
       "document_identifier": "CTRL-2024-ITA-L42",
       "documented_incident_description": "Clean aerodynamic tow and positional slipstream on main straight. Both cars adhered strictly to racing lines.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS"],
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "AVAILABLE",
       "regulation_availability": "AVAILABLE",
       "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
       "verification_status": "VERIFIED",
       "interaction_category": "NOMINAL_RACING_CONTROL",
       "is_control_case": true,
@@ -362,7 +414,8 @@
         "circuit": "Monza",
         "event": "Italian_GP_2024",
         "session": "Race",
-        "driver_pair": "LEC-SAI"
+        "driver_pair": "LEC-SAI",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "NO_INVESTIGATION_NECESSARY",
@@ -371,13 +424,164 @@
         "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["LEC", "SAI"],
+        "driver_pair": [
+          "LEC",
+          "SAI"
+        ],
         "primary_turn": "Turn 1",
-        "minimum_gap_meters_range": [3.00, 6.00],
-        "delta_brake_meters_range": [-2.0, 2.0],
-        "expected_relevant_articles": ["Article 33.3"],
+        "minimum_gap_meters_range": [
+          3.0,
+          6.0
+        ],
+        "delta_brake_meters_range": [
+          -2.0,
+          2.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
         "reference_baseline_status": "AVAILABLE",
         "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2024-AUT-R-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Austrian Grand Prix",
+      "session": "Race",
+      "lap": 64,
+      "driver_a": "VER",
+      "driver_b": "NOR",
+      "incident_timestamp": "2024-06-30T14:48:19.200Z",
+      "incident_window": {
+        "start_time": "2024-06-30T14:48:16.500Z",
+        "end_time": "2024-06-30T14:48:22.000Z",
+        "peak_time": "2024-06-30T14:48:19.200Z",
+        "duration_seconds": 5.5
+      },
+      "circuit": "Red Bull Ring",
+      "corner": "T3 (Remus)",
+      "official_document": "FIA Document 66 - Offence - Car 1 - Causing a collision with Car 4",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Austrian%20Grand%20Prix",
+      "document_identifier": "DOC-66-2024-AUT-CAR1",
+      "documented_incident_description": "Car 1 moved to the left on corner approach under braking for Turn 3, leading to physical wheel contact with Car 4 on the outside.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "CONTACT_COLLISION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Red Bull Ring",
+        "event": "Austrian_GP_2024",
+        "session": "Race",
+        "driver_pair": "VER-NOR",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "10-second time penalty and 2 penalty points assigned to Car 1 for breach of ISC Appendix L Ch IV Art 2(d).",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "VER",
+          "NOR"
+        ],
+        "primary_turn": "Turn 3",
+        "minimum_gap_meters_range": [
+          0.0,
+          0.5
+        ],
+        "delta_brake_meters_range": [
+          -5.0,
+          5.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-AUT-R-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Austrian Grand Prix",
+      "session": "Race",
+      "lap": 63,
+      "driver_a": "NOR",
+      "driver_b": "VER",
+      "incident_timestamp": "2024-06-30T14:47:04.100Z",
+      "incident_window": {
+        "start_time": "2024-06-30T14:47:01.000Z",
+        "end_time": "2024-06-30T14:47:07.000Z",
+        "peak_time": "2024-06-30T14:47:04.100Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Red Bull Ring",
+      "corner": "T3 (Remus)",
+      "official_document": "FIA Race Control Event Log - Lap 63 Turn 3 Off-Track / Track Limits",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Austrian%20Grand%20Prix",
+      "document_identifier": "RCM-2024-AUT-LAP63-T3",
+      "documented_incident_description": "Car 4 made an inside dive overtake into Turn 3, locked up slightly, and exceeded track limits on exit while Car 1 retained position.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "Race Control Messages"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "BRAKING_APPROACH",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Red Bull Ring",
+        "event": "Austrian_GP_2024",
+        "session": "Race",
+        "driver_pair": "NOR-VER",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "TRACK_LIMITS_STRIKE",
+        "description": "Car 4 assigned track limits strike (exceeding track limits at Turn 3). Position handed back immediately.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "NOR",
+          "VER"
+        ],
+        "primary_turn": "Turn 3",
+        "minimum_gap_meters_range": [
+          0.8,
+          2.0
+        ],
+        "delta_brake_meters_range": [
+          15.0,
+          30.0
+        ],
+        "expected_relevant_articles": [
+          "Article 27.3",
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
       }
     },
     {
@@ -402,11 +606,15 @@
       "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Austrian%20Grand%20Prix",
       "document_identifier": "CTRL-2024-AUT-L59",
       "documented_incident_description": "Clean defensive positioning into Turn 3. Full track width left for overtaking car on entry.",
-      "data_sources": ["FastF1 25Hz Resampled CAN-Bus", "OpenF1 Real-Time GPS"],
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "AVAILABLE",
       "regulation_availability": "AVAILABLE",
       "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
       "verification_status": "VERIFIED",
       "interaction_category": "NOMINAL_RACING_CONTROL",
       "is_control_case": true,
@@ -414,7 +622,8 @@
         "circuit": "Red Bull Ring",
         "event": "Austrian_GP_2024",
         "session": "Race",
-        "driver_pair": "VER-NOR"
+        "driver_pair": "VER-NOR",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "NO_INVESTIGATION_NECESSARY",
@@ -423,11 +632,1472 @@
         "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["VER", "NOR"],
+        "driver_pair": [
+          "VER",
+          "NOR"
+        ],
         "primary_turn": "Turn 3",
-        "minimum_gap_meters_range": [2.00, 4.00],
-        "delta_brake_meters_range": [-1.0, 3.0],
-        "expected_relevant_articles": ["Article 33.3"],
+        "minimum_gap_meters_range": [
+          2.0,
+          4.0
+        ],
+        "delta_brake_meters_range": [
+          -1.0,
+          3.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2024-AUT-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Austrian Grand Prix",
+      "session": "Race",
+      "lap": 68,
+      "driver_a": "RUS",
+      "driver_b": "PIA",
+      "incident_timestamp": "2024-06-30T14:53:11.000Z",
+      "incident_window": {
+        "start_time": "2024-06-30T14:53:08.000Z",
+        "end_time": "2024-06-30T14:53:14.000Z",
+        "peak_time": "2024-06-30T14:53:11.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Red Bull Ring",
+      "corner": "T1 (Castrol)",
+      "official_document": "FIA Official Timing Classification - Lap 68 Lead Transition",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Austrian%20Grand%20Prix",
+      "document_identifier": "CTRL-2024-AUT-L68",
+      "documented_incident_description": "Clean corner entry and straight-line following under green flag after incident ahead.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Red Bull Ring",
+        "event": "Austrian_GP_2024",
+        "session": "Race",
+        "driver_pair": "RUS-PIA",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control. Normal following distance maintained.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "RUS",
+          "PIA"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          3.5,
+          7.0
+        ],
+        "delta_brake_meters_range": [
+          -2.0,
+          2.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2024-USA-R-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "United States Grand Prix",
+      "session": "Race",
+      "lap": 52,
+      "driver_a": "NOR",
+      "driver_b": "VER",
+      "incident_timestamp": "2024-10-20T20:41:15.300Z",
+      "incident_window": {
+        "start_time": "2024-10-20T20:41:12.000Z",
+        "end_time": "2024-10-20T20:41:18.000Z",
+        "peak_time": "2024-10-20T20:41:15.300Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Circuit of the Americas",
+      "corner": "T12 (Hairpin End of Backstraight)",
+      "official_document": "FIA Document 69 - Offence - Car 4 - Leaving the track and gaining a lasting advantage",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/United%20States%20Grand%20Prix",
+      "document_identifier": "DOC-69-2024-USA-CAR4",
+      "documented_incident_description": "Car 4 attempted an outside overtake on Car 1 into Turn 12. Both cars exceeded track limits at apex/exit; Car 4 completed pass outside track boundaries.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "FORCING_OFF_TRACK",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Circuit of the Americas",
+        "event": "United_States_GP_2024",
+        "session": "Race",
+        "driver_pair": "NOR-VER",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "5-second time penalty assigned to Car 4 for leaving the track and gaining a lasting advantage.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "NOR",
+          "VER"
+        ],
+        "primary_turn": "Turn 12",
+        "minimum_gap_meters_range": [
+          0.4,
+          1.8
+        ],
+        "delta_brake_meters_range": [
+          12.0,
+          26.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3",
+          "Appendix L Ch IV Art 2(c)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-USA-R-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "United States Grand Prix",
+      "session": "Race",
+      "lap": 14,
+      "driver_a": "RUS",
+      "driver_b": "BOT",
+      "incident_timestamp": "2024-10-20T19:35:42.100Z",
+      "incident_window": {
+        "start_time": "2024-10-20T19:35:39.000Z",
+        "end_time": "2024-10-20T19:35:45.000Z",
+        "peak_time": "2024-10-20T19:35:42.100Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Circuit of the Americas",
+      "corner": "T12 (Backstraight Hairpin)",
+      "official_document": "FIA Document 45 - Offence - Car 63 - Forcing Car 77 off the track",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/United%20States%20Grand%20Prix",
+      "document_identifier": "DOC-45-2024-USA-CAR63",
+      "documented_incident_description": "Car 63 overtook Car 77 on the inside at Turn 12 but ran deep on exit, forcing Car 77 entirely off track.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "FORCING_OFF_TRACK",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Circuit of the Americas",
+        "event": "United_States_GP_2024",
+        "session": "Race",
+        "driver_pair": "RUS-BOT",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "5-second time penalty assigned to Car 63 for forcing another car off the track.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "RUS",
+          "BOT"
+        ],
+        "primary_turn": "Turn 12",
+        "minimum_gap_meters_range": [
+          0.5,
+          1.5
+        ],
+        "delta_brake_meters_range": [
+          10.0,
+          22.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(b)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-USA-R-03",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "United States Grand Prix",
+      "session": "Race",
+      "lap": 32,
+      "driver_a": "TSU",
+      "driver_b": "ALB",
+      "incident_timestamp": "2024-10-20T20:06:20.500Z",
+      "incident_window": {
+        "start_time": "2024-10-20T20:06:17.500Z",
+        "end_time": "2024-10-20T20:06:23.500Z",
+        "peak_time": "2024-10-20T20:06:20.500Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Circuit of the Americas",
+      "corner": "T1 (Crest Hairpin)",
+      "official_document": "FIA Document 48 - Offence - Car 22 - Forcing Car 23 off track",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/United%20States%20Grand%20Prix",
+      "document_identifier": "DOC-48-2024-USA-CAR22",
+      "documented_incident_description": "Car 22 defended inside into Turn 1, crowded Car 23 at corner apex, causing Car 23 to exceed track limits.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "FORCING_OFF_TRACK",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Circuit of the Americas",
+        "event": "United_States_GP_2024",
+        "session": "Race",
+        "driver_pair": "TSU-ALB",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "5-second time penalty assigned to Car 22.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "TSU",
+          "ALB"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          0.3,
+          1.2
+        ],
+        "delta_brake_meters_range": [
+          6.0,
+          18.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(b)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2024-USA-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "United States Grand Prix",
+      "session": "Race",
+      "lap": 1,
+      "driver_a": "LEC",
+      "driver_b": "SAI",
+      "incident_timestamp": "2024-10-20T19:04:12.000Z",
+      "incident_window": {
+        "start_time": "2024-10-20T19:04:09.000Z",
+        "end_time": "2024-10-20T19:04:15.000Z",
+        "peak_time": "2024-10-20T19:04:12.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Circuit of the Americas",
+      "corner": "T1 (Uphill Hairpin)",
+      "official_document": "FIA Official Timing Classification - Lap 1 Lead Overtake",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/United%20States%20Grand%20Prix",
+      "document_identifier": "CTRL-2024-USA-L1",
+      "documented_incident_description": "Clean inside cutback pass at Turn 1 apex by Car 16 capitalizing on leaders running wide. Clean racing room left.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Circuit of the Americas",
+        "event": "United_States_GP_2024",
+        "session": "Race",
+        "driver_pair": "LEC-SAI",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control pass. Fully compliant race lead overtake.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "LEC",
+          "SAI"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          2.8,
+          5.0
+        ],
+        "delta_brake_meters_range": [
+          -2.0,
+          4.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2024-USA-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "United States Grand Prix",
+      "session": "Race",
+      "lap": 22,
+      "driver_a": "HAM",
+      "driver_b": "PER",
+      "incident_timestamp": "2024-10-20T19:48:33.000Z",
+      "incident_window": {
+        "start_time": "2024-10-20T19:48:30.000Z",
+        "end_time": "2024-10-20T19:48:36.000Z",
+        "peak_time": "2024-10-20T19:48:33.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Circuit of the Americas",
+      "corner": "T12 (Backstraight)",
+      "official_document": "FIA Official Timing Classification - Lap 22 DRS Pass",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/United%20States%20Grand%20Prix",
+      "document_identifier": "CTRL-2024-USA-L22",
+      "documented_incident_description": "Clean DRS slipstream and brake zone overtake along the back straight. Clear car width maintained throughout.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Circuit of the Americas",
+        "event": "United_States_GP_2024",
+        "session": "Race",
+        "driver_pair": "HAM-PER",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control pass. Standard DRS highway overtake.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "HAM",
+          "PER"
+        ],
+        "primary_turn": "Turn 12",
+        "minimum_gap_meters_range": [
+          3.0,
+          6.0
+        ],
+        "delta_brake_meters_range": [
+          -3.0,
+          3.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2024-MEX-R-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Mexico City Grand Prix",
+      "session": "Race",
+      "lap": 10,
+      "driver_a": "VER",
+      "driver_b": "NOR",
+      "incident_timestamp": "2024-10-27T20:20:15.000Z",
+      "incident_window": {
+        "start_time": "2024-10-27T20:20:12.000Z",
+        "end_time": "2024-10-27T20:20:18.000Z",
+        "peak_time": "2024-10-27T20:20:15.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+      "corner": "T4 (Chicane Entry)",
+      "official_document": "FIA Document 45 - Offence - Car 1 - Forcing Car 4 off track",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Mexico%20City%20Grand%20Prix",
+      "document_identifier": "DOC-45-2024-MEX-CAR1",
+      "documented_incident_description": "Car 1 pushed Car 4 wide on corner entry/apex of Turn 4, forcing Car 4 to take the grassy runoff.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "FORCING_OFF_TRACK",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "event": "Mexico_City_GP_2024",
+        "session": "Race",
+        "driver_pair": "VER-NOR",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "10-second time penalty and 2 penalty points assigned to Car 1 for forcing Car 4 off the track at Turn 4.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "VER",
+          "NOR"
+        ],
+        "primary_turn": "Turn 4",
+        "minimum_gap_meters_range": [
+          0.3,
+          1.4
+        ],
+        "delta_brake_meters_range": [
+          8.0,
+          20.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(b)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-MEX-R-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Mexico City Grand Prix",
+      "session": "Race",
+      "lap": 10,
+      "driver_a": "VER",
+      "driver_b": "NOR",
+      "incident_timestamp": "2024-10-27T20:20:34.200Z",
+      "incident_window": {
+        "start_time": "2024-10-27T20:20:31.000Z",
+        "end_time": "2024-10-27T20:20:37.000Z",
+        "peak_time": "2024-10-27T20:20:34.200Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+      "corner": "T7-T8 (Esses S-Bends)",
+      "official_document": "FIA Document 46 - Offence - Car 1 - Leaving track and gaining lasting advantage",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Mexico%20City%20Grand%20Prix",
+      "document_identifier": "DOC-46-2024-MEX-CAR1-T7",
+      "documented_incident_description": "Car 1 lunged inside into Turn 7, left the track boundaries entirely with Car 4, and retained the lead on rejoin.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "FORCING_OFF_TRACK",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "event": "Mexico_City_GP_2024",
+        "session": "Race",
+        "driver_pair": "VER-NOR",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "10-second time penalty assigned to Car 1 for leaving the track and gaining a lasting advantage at Turn 7/8.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "VER",
+          "NOR"
+        ],
+        "primary_turn": "Turn 7",
+        "minimum_gap_meters_range": [
+          0.2,
+          1.1
+        ],
+        "delta_brake_meters_range": [
+          14.0,
+          28.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3",
+          "Appendix L Ch IV Art 2(c)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-MEX-R-03",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Mexico City Grand Prix",
+      "session": "Race",
+      "lap": 19,
+      "driver_a": "PER",
+      "driver_b": "LAW",
+      "incident_timestamp": "2024-10-27T20:32:45.000Z",
+      "incident_window": {
+        "start_time": "2024-10-27T20:32:42.000Z",
+        "end_time": "2024-10-27T20:32:48.000Z",
+        "peak_time": "2024-10-27T20:32:45.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+      "corner": "T4-T5 (Chicane)",
+      "official_document": "FIA Race Control Event Log - Lap 19 Turn 4 Side Contact",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Mexico%20City%20Grand%20Prix",
+      "document_identifier": "RCM-2024-MEX-LAP19-T4",
+      "documented_incident_description": "Aggressive side-by-side battle between Car 11 and Car 30 through Turn 4/5 resulting in sidepod bodywork contact.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "Race Control Messages"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "CONTACT_COLLISION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "event": "Mexico_City_GP_2024",
+        "session": "Race",
+        "driver_pair": "PER-LAW",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Racing incident; hard racing with no single driver wholly or predominantly to blame.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "PER",
+          "LAW"
+        ],
+        "primary_turn": "Turn 4",
+        "minimum_gap_meters_range": [
+          0.0,
+          0.6
+        ],
+        "delta_brake_meters_range": [
+          5.0,
+          15.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2024-MEX-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Mexico City Grand Prix",
+      "session": "Race",
+      "lap": 9,
+      "driver_a": "SAI",
+      "driver_b": "VER",
+      "incident_timestamp": "2024-10-27T20:18:22.000Z",
+      "incident_window": {
+        "start_time": "2024-10-27T20:18:19.000Z",
+        "end_time": "2024-10-27T20:18:25.000Z",
+        "peak_time": "2024-10-27T20:18:22.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+      "corner": "T1 (Main Straight End)",
+      "official_document": "FIA Official Timing Classification - Lap 9 Lead Overtake",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Mexico%20City%20Grand%20Prix",
+      "document_identifier": "CTRL-2024-MEX-L9",
+      "documented_incident_description": "Clean slipstream and textbook dive overtake into Turn 1 for the lead. Ample apex clearance given.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "event": "Mexico_City_GP_2024",
+        "session": "Race",
+        "driver_pair": "SAI-VER",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control pass. Exemplary execution of race lead pass.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "SAI",
+          "VER"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          2.2,
+          4.5
+        ],
+        "delta_brake_meters_range": [
+          -2.0,
+          4.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2024-MEX-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Mexico City Grand Prix",
+      "session": "Race",
+      "lap": 62,
+      "driver_a": "LEC",
+      "driver_b": "NOR",
+      "incident_timestamp": "2024-10-27T21:30:15.000Z",
+      "incident_window": {
+        "start_time": "2024-10-27T21:30:12.000Z",
+        "end_time": "2024-10-27T21:30:18.000Z",
+        "peak_time": "2024-10-27T21:30:15.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+      "corner": "T17 (Peraltada Exit)",
+      "official_document": "FIA Official Timing Classification - Lap 62 Position Change",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Mexico%20City%20Grand%20Prix",
+      "document_identifier": "CTRL-2024-MEX-L62",
+      "documented_incident_description": "Car 16 snapped oversteer on exit of Turn 17; Car 4 cleanly drove past on the main straight without incident.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "event": "Mexico_City_GP_2024",
+        "session": "Race",
+        "driver_pair": "LEC-NOR",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control. Driver vehicle control recovery.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "LEC",
+          "NOR"
+        ],
+        "primary_turn": "Turn 17",
+        "minimum_gap_meters_range": [
+          3.5,
+          6.0
+        ],
+        "delta_brake_meters_range": [
+          -1.0,
+          2.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2024-BEL-R-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Belgian Grand Prix",
+      "session": "Race",
+      "lap": 12,
+      "driver_a": "PIA",
+      "driver_b": "HAM",
+      "incident_timestamp": "2024-07-28T13:25:40.000Z",
+      "incident_window": {
+        "start_time": "2024-07-28T13:25:37.000Z",
+        "end_time": "2024-07-28T13:25:43.000Z",
+        "peak_time": "2024-07-28T13:25:40.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Spa-Francorchamps",
+      "corner": "T5-T6 (Les Combes)",
+      "official_document": "FIA Race Control Event Log - Lap 12 Les Combes Overtaking Interaction",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Belgian%20Grand%20Prix",
+      "document_identifier": "RCM-2024-BEL-LAP12-T5",
+      "documented_incident_description": "High-speed Kemmel Straight slipstream braking duel into Les Combes chicane. Clean late braking approach.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "Race Control Messages"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "OVERTAKING_INTERACTION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Spa-Francorchamps",
+        "event": "Belgian_GP_2024",
+        "session": "Race",
+        "driver_pair": "PIA-HAM",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Clean racing interaction noted and cleared by Race Control.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "PIA",
+          "HAM"
+        ],
+        "primary_turn": "Turn 5",
+        "minimum_gap_meters_range": [
+          1.1,
+          2.4
+        ],
+        "delta_brake_meters_range": [
+          6.0,
+          16.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2024-BEL-R-02",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Belgian Grand Prix",
+      "session": "Race",
+      "lap": 28,
+      "driver_a": "RIC",
+      "driver_b": "STR",
+      "incident_timestamp": "2024-07-28T13:54:18.000Z",
+      "incident_window": {
+        "start_time": "2024-07-28T13:54:15.000Z",
+        "end_time": "2024-07-28T13:54:21.000Z",
+        "peak_time": "2024-07-28T13:54:18.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Spa-Francorchamps",
+      "corner": "T1 (La Source Hairpin)",
+      "official_document": "FIA Race Control Event Log - Lap 28 Turn 1 Defensive Positioning",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Belgian%20Grand%20Prix",
+      "document_identifier": "RCM-2024-BEL-LAP28-T1",
+      "documented_incident_description": "Car 3 squeezed inside into La Source hairpin, Car 18 defended wide on entry with close lateral clearance.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "Race Control Messages"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "DEFENSIVE_POSITIONING",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Spa-Francorchamps",
+        "event": "Belgian_GP_2024",
+        "session": "Race",
+        "driver_pair": "RIC-STR",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Legitimate defensive positioning under braking. No infraction.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "RIC",
+          "STR"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          0.8,
+          2.0
+        ],
+        "delta_brake_meters_range": [
+          4.0,
+          14.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2024-BEL-01",
+      "series": "Formula 1",
+      "season": 2024,
+      "event": "Belgian Grand Prix",
+      "session": "Race",
+      "lap": 40,
+      "driver_a": "VER",
+      "driver_b": "LEC",
+      "incident_timestamp": "2024-07-28T14:14:50.000Z",
+      "incident_window": {
+        "start_time": "2024-07-28T14:14:47.000Z",
+        "end_time": "2024-07-28T14:14:53.000Z",
+        "peak_time": "2024-07-28T14:14:50.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Spa-Francorchamps",
+      "corner": "T18-T19 (Bus Stop Chicane)",
+      "official_document": "FIA Official Timing Classification - Lap 40 Following Trace",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2024-2043/event/Belgian%20Grand%20Prix",
+      "document_identifier": "CTRL-2024-BEL-L40",
+      "documented_incident_description": "Clean close pursuit through Bus Stop chicane without dive or lockup. Pure green flag following.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Spa-Francorchamps",
+        "event": "Belgian_GP_2024",
+        "session": "Race",
+        "driver_pair": "VER-LEC",
+        "season": 2024
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control. Standard following distance in braking zone.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "VER",
+          "LEC"
+        ],
+        "primary_turn": "Turn 18",
+        "minimum_gap_meters_range": [
+          3.0,
+          5.5
+        ],
+        "delta_brake_meters_range": [
+          -2.0,
+          3.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2023-LVG-R-01",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Las Vegas Grand Prix",
+      "session": "Race",
+      "lap": 1,
+      "driver_a": "VER",
+      "driver_b": "LEC",
+      "incident_timestamp": "2023-11-19T06:04:15.000Z",
+      "incident_window": {
+        "start_time": "2023-11-19T06:04:12.000Z",
+        "end_time": "2023-11-19T06:04:18.000Z",
+        "peak_time": "2023-11-19T06:04:15.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Las Vegas Strip Circuit",
+      "corner": "T1 (Start Hairpin)",
+      "official_document": "FIA Document 42 - Offence - Car 1 - Forcing Car 16 off track",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Las%20Vegas%20Grand%20Prix",
+      "document_identifier": "DOC-42-2023-LVG-CAR1",
+      "documented_incident_description": "Car 1 moved down inside on the Lap 1 race start, ran deep into Turn 1, and forced Car 16 off track at the exit.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "FORCING_OFF_TRACK",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Las Vegas Strip Circuit",
+        "event": "Las_Vegas_GP_2023",
+        "session": "Race",
+        "driver_pair": "VER-LEC",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "5-second time penalty assigned to Car 1 for forcing Car 16 off the track at Turn 1.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "VER",
+          "LEC"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          0.3,
+          1.2
+        ],
+        "delta_brake_meters_range": [
+          12.0,
+          24.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(b)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-2023-LVG-R-02",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Las Vegas Grand Prix",
+      "session": "Race",
+      "lap": 25,
+      "driver_a": "RUS",
+      "driver_b": "VER",
+      "incident_timestamp": "2023-11-19T06:48:22.000Z",
+      "incident_window": {
+        "start_time": "2023-11-19T06:48:19.000Z",
+        "end_time": "2023-11-19T06:48:25.000Z",
+        "peak_time": "2023-11-19T06:48:22.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Las Vegas Strip Circuit",
+      "corner": "T12 (Koval Chicane Apex)",
+      "official_document": "FIA Document 52 - Offence - Car 63 - Causing a collision with Car 1",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Las%20Vegas%20Grand%20Prix",
+      "document_identifier": "DOC-52-2023-LVG-CAR63",
+      "documented_incident_description": "Car 1 moved inside for an overtake into Turn 12. Car 63 turned into the apex without leaving space, initiating side collision.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "CONTACT_COLLISION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Las Vegas Strip Circuit",
+        "event": "Las_Vegas_GP_2023",
+        "session": "Race",
+        "driver_pair": "RUS-VER",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "5-second time penalty and 2 penalty points assigned to Car 63 for causing a collision.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "RUS",
+          "VER"
+        ],
+        "primary_turn": "Turn 12",
+        "minimum_gap_meters_range": [
+          0.0,
+          0.4
+        ],
+        "delta_brake_meters_range": [
+          6.0,
+          16.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2023-LVG-01",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Las Vegas Grand Prix",
+      "session": "Race",
+      "lap": 50,
+      "driver_a": "LEC",
+      "driver_b": "PER",
+      "incident_timestamp": "2023-11-19T07:35:10.000Z",
+      "incident_window": {
+        "start_time": "2023-11-19T07:35:07.000Z",
+        "end_time": "2023-11-19T07:35:13.000Z",
+        "peak_time": "2023-11-19T07:35:10.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Las Vegas Strip Circuit",
+      "corner": "T14 (Strip End Chicane)",
+      "official_document": "FIA Official Timing Classification - Lap 50 P2 Overtake",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Las%20Vegas%20Grand%20Prix",
+      "document_identifier": "CTRL-2023-LVG-L50",
+      "documented_incident_description": "Clean last-lap dive overtake on the inside under heavy braking from 340 km/h into Turn 14. Impeccable car control and racing room.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Las Vegas Strip Circuit",
+        "event": "Las_Vegas_GP_2023",
+        "session": "Race",
+        "driver_pair": "LEC-PER",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control pass. Exceptional last-lap overtake.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "LEC",
+          "PER"
+        ],
+        "primary_turn": "Turn 14",
+        "minimum_gap_meters_range": [
+          1.5,
+          3.2
+        ],
+        "delta_brake_meters_range": [
+          10.0,
+          22.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2023-ABU-R-01",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Abu Dhabi Grand Prix",
+      "session": "Race",
+      "lap": 47,
+      "driver_a": "PER",
+      "driver_b": "NOR",
+      "incident_timestamp": "2023-11-26T14:20:05.000Z",
+      "incident_window": {
+        "start_time": "2023-11-26T14:20:02.000Z",
+        "end_time": "2023-11-26T14:20:08.000Z",
+        "peak_time": "2023-11-26T14:20:05.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Yas Marina Circuit",
+      "corner": "T6-T7 (Chicane End of Backstraight)",
+      "official_document": "FIA Document 54 - Offence - Car 11 - Causing a collision with Car 4",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Abu%20Dhabi%20Grand%20Prix",
+      "document_identifier": "DOC-54-2023-ABU-CAR11",
+      "documented_incident_description": "Car 11 lunged late on the inside of Turn 6, suffered front-right understeer, and made contact with the left side of Car 4.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "CONTACT_COLLISION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Yas Marina Circuit",
+        "event": "Abu_Dhabi_GP_2023",
+        "session": "Race",
+        "driver_pair": "PER-NOR",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "PENALTY_APPLIED",
+        "description": "5-second time penalty and 2 penalty points assigned to Car 11 for causing a collision.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "PER",
+          "NOR"
+        ],
+        "primary_turn": "Turn 6",
+        "minimum_gap_meters_range": [
+          0.0,
+          0.4
+        ],
+        "delta_brake_meters_range": [
+          8.0,
+          20.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2023-ABU-01",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Abu Dhabi Grand Prix",
+      "session": "Race",
+      "lap": 54,
+      "driver_a": "HAM",
+      "driver_b": "TSU",
+      "incident_timestamp": "2023-11-26T14:32:40.000Z",
+      "incident_window": {
+        "start_time": "2023-11-26T14:32:37.000Z",
+        "end_time": "2023-11-26T14:32:43.000Z",
+        "peak_time": "2023-11-26T14:32:40.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Yas Marina Circuit",
+      "corner": "T9 (Long Sweeping Hairpin)",
+      "official_document": "FIA Official Timing Classification - Lap 54 Pursuit",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Abu%20Dhabi%20Grand%20Prix",
+      "document_identifier": "CTRL-2023-ABU-L54",
+      "documented_incident_description": "Clean high-speed following around Turn 9 sweeping banking. Cars remained within 1 second without contact or boundary strikes.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Yas Marina Circuit",
+        "event": "Abu_Dhabi_GP_2023",
+        "session": "Race",
+        "driver_pair": "HAM-TSU",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control. Standard pursuit lap.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "HAM",
+          "TSU"
+        ],
+        "primary_turn": "Turn 9",
+        "minimum_gap_meters_range": [
+          3.2,
+          5.8
+        ],
+        "delta_brake_meters_range": [
+          -1.0,
+          3.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "NONE"
+      }
+    },
+    {
+      "case_id": "HIST-2023-QAT-R-01",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Qatar Grand Prix",
+      "session": "Race",
+      "lap": 1,
+      "driver_a": "HAM",
+      "driver_b": "RUS",
+      "incident_timestamp": "2023-10-08T17:03:22.000Z",
+      "incident_window": {
+        "start_time": "2023-10-08T17:03:19.000Z",
+        "end_time": "2023-10-08T17:03:25.000Z",
+        "peak_time": "2023-10-08T17:03:22.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Losail International Circuit",
+      "corner": "T1 (Start Turn 1)",
+      "official_document": "FIA Document 39 - Stewards Decision - Car 44 & Car 63 Turn 1",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Qatar%20Grand%20Prix",
+      "document_identifier": "DOC-39-2023-QAT-CAR44",
+      "documented_incident_description": "Car 44 attempted an outside sweep into Turn 1 on soft tyres and made heavy wheel-to-wheel contact with Car 63.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS",
+        "FIA Steward Decisions"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "OFFICIAL_STEWARD_DECISION",
+      "ground_truth_provenance": "OFFICIAL_DOCUMENT",
+      "verification_status": "VERIFIED",
+      "interaction_category": "CONTACT_COLLISION",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Losail International Circuit",
+        "event": "Qatar_GP_2023",
+        "session": "Race",
+        "driver_pair": "HAM-RUS",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "REPRIMAND_AND_FINDING",
+        "description": "Stewards reviewed telemetry and video; Driver of Car 44 accepted full responsibility for opening lap incident.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record of historical officiating outcome."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "HAM",
+          "RUS"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          0.0,
+          0.3
+        ],
+        "delta_brake_meters_range": [
+          5.0,
+          18.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.4",
+          "Appendix L Ch IV Art 2(d)"
+        ],
+        "reference_baseline_status": "AVAILABLE",
+        "expected_discrepancy_severity": "LOW"
+      }
+    },
+    {
+      "case_id": "HIST-CTRL-2023-QAT-01",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Qatar Grand Prix",
+      "session": "Race",
+      "lap": 15,
+      "driver_a": "PIA",
+      "driver_b": "VER",
+      "incident_timestamp": "2023-10-08T17:28:10.000Z",
+      "incident_window": {
+        "start_time": "2023-10-08T17:28:07.000Z",
+        "end_time": "2023-10-08T17:28:13.000Z",
+        "peak_time": "2023-10-08T17:28:10.000Z",
+        "duration_seconds": 6.0
+      },
+      "circuit": "Losail International Circuit",
+      "corner": "T1 (Main Straight Entry)",
+      "official_document": "FIA Official Timing Classification - Lap 15 Interval",
+      "official_document_url": "https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042/event/Qatar%20Grand%20Prix",
+      "document_identifier": "CTRL-2023-QAT-L15",
+      "documented_incident_description": "Clean high-speed corner exit and straight-line slipstream following at 310 km/h with no erratic movement.",
+      "data_sources": [
+        "FastF1 25Hz Resampled CAN-Bus",
+        "OpenF1 Real-Time GPS"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "AVAILABLE",
+      "regulation_availability": "AVAILABLE",
+      "ground_truth_type": "NOMINAL_RACING_CONTROL",
+      "ground_truth_provenance": "DERIVED_FROM_SAME_TELEMETRY",
+      "verification_status": "VERIFIED",
+      "interaction_category": "NOMINAL_RACING_CONTROL",
+      "is_control_case": true,
+      "split_group": {
+        "circuit": "Losail International Circuit",
+        "event": "Qatar_GP_2023",
+        "session": "Race",
+        "driver_pair": "PIA-VER",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "NO_INVESTIGATION_NECESSARY",
+        "description": "Nominal racing control. High-speed aero balance demonstration.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Documentary record confirming clean sporting engagement; used as negative control."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "PIA",
+          "VER"
+        ],
+        "primary_turn": "Turn 1",
+        "minimum_gap_meters_range": [
+          3.8,
+          6.5
+        ],
+        "delta_brake_meters_range": [
+          -2.0,
+          3.0
+        ],
+        "expected_relevant_articles": [
+          "Article 33.3"
+        ],
         "reference_baseline_status": "AVAILABLE",
         "expected_discrepancy_severity": "NONE"
       }
@@ -454,11 +2124,14 @@
       "official_document_url": "N/A",
       "document_identifier": "UNOFFICIAL-UNVERIFIED",
       "documented_incident_description": "Alleged close call during practice session lacking official steward investigation or authoritative telemetry confirmation.",
-      "data_sources": ["Unofficial Commentary"],
+      "data_sources": [
+        "Unofficial Commentary"
+      ],
       "video_availability": "UNAVAILABLE",
       "telemetry_availability": "UNAVAILABLE",
       "regulation_availability": "PARTIALLY_AVAILABLE",
       "ground_truth_type": "UNVERIFIED",
+      "ground_truth_provenance": "UNKNOWN",
       "verification_status": "UNVERIFIED",
       "interaction_category": "DEFENSIVE_POSITIONING",
       "is_control_case": false,
@@ -466,7 +2139,8 @@
         "circuit": "Silverstone",
         "event": "British_GP_2024",
         "session": "Practice_1",
-        "driver_pair": "STR-SAR"
+        "driver_pair": "STR-SAR",
+        "season": 2024
       },
       "documented_steward_outcome": {
         "decision_type": "UNVERIFIED",
@@ -475,10 +2149,84 @@
         "adjudicative_note": "Unverified case; must be strictly excluded from quantitative benchmark scoring."
       },
       "expected_reconstruction_targets": {
-        "driver_pair": ["STR", "SAR"],
+        "driver_pair": [
+          "STR",
+          "SAR"
+        ],
         "primary_turn": "Turn 3",
-        "minimum_gap_meters_range": [0.0, 10.0],
-        "delta_brake_meters_range": [0.0, 0.0],
+        "minimum_gap_meters_range": [
+          0.0,
+          10.0
+        ],
+        "delta_brake_meters_range": [
+          0.0,
+          0.0
+        ],
+        "expected_relevant_articles": [],
+        "reference_baseline_status": "INSUFFICIENT_REFERENCE_DATA",
+        "expected_discrepancy_severity": "UNRESOLVED"
+      }
+    },
+    {
+      "case_id": "HIST-2023-MONACO-UNVERIFIED-02",
+      "series": "Formula 1",
+      "season": 2023,
+      "event": "Monaco Grand Prix",
+      "session": "Practice 2",
+      "lap": 12,
+      "driver_a": "MAG",
+      "driver_b": "DEV",
+      "incident_timestamp": "2023-05-26T15:30:00.000Z",
+      "incident_window": {
+        "start_time": "2023-05-26T15:29:55.000Z",
+        "end_time": "2023-05-26T15:30:05.000Z",
+        "peak_time": "2023-05-26T15:30:00.000Z",
+        "duration_seconds": 10.0
+      },
+      "circuit": "Circuit de Monaco",
+      "corner": "T10 (Chicane Exit)",
+      "official_document": "Unverified Paddock Rumor",
+      "official_document_url": "N/A",
+      "document_identifier": "UNOFFICIAL-UNVERIFIED-MON",
+      "documented_incident_description": "Unverified online forum claim of crowding at chicane lacking official steward notice.",
+      "data_sources": [
+        "Unofficial Commentary"
+      ],
+      "video_availability": "UNAVAILABLE",
+      "telemetry_availability": "UNAVAILABLE",
+      "regulation_availability": "PARTIALLY_AVAILABLE",
+      "ground_truth_type": "UNVERIFIED",
+      "ground_truth_provenance": "UNKNOWN",
+      "verification_status": "UNVERIFIED",
+      "interaction_category": "DEFENSIVE_POSITIONING",
+      "is_control_case": false,
+      "split_group": {
+        "circuit": "Circuit de Monaco",
+        "event": "Monaco_GP_2023",
+        "session": "Practice_2",
+        "driver_pair": "MAG-DEV",
+        "season": 2023
+      },
+      "documented_steward_outcome": {
+        "decision_type": "UNVERIFIED",
+        "description": "No official FIA ruling exists.",
+        "epistemic_classification": "DOCUMENTARY",
+        "adjudicative_note": "Unverified case; must be strictly excluded from quantitative benchmark scoring."
+      },
+      "expected_reconstruction_targets": {
+        "driver_pair": [
+          "MAG",
+          "DEV"
+        ],
+        "primary_turn": "Turn 10",
+        "minimum_gap_meters_range": [
+          0.0,
+          10.0
+        ],
+        "delta_brake_meters_range": [
+          0.0,
+          0.0
+        ],
         "expected_relevant_articles": [],
         "reference_baseline_status": "INSUFFICIENT_REFERENCE_DATA",
         "expected_discrepancy_severity": "UNRESOLVED"

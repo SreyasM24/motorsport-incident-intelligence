@@ -47,6 +47,8 @@ from app.benchmark import (
     BenchmarkSuiteReport,
     CaseEvaluationReport,
     ComparableIncidentMatch,
+    ComparatorEvaluationReport,
+    MetricProvenanceAudit,
     get_benchmark_service,
 )
 
@@ -525,6 +527,49 @@ def get_comparable_historical_incidents_endpoint(
     service = get_benchmark_service()
     matches = service.find_comparable_cases(case_id=case_id, top_k=top_k)
     return matches
+
+
+@router.get(
+    "/benchmark/provenance-matrix",
+    response_model=List[MetricProvenanceAudit],
+    summary="Retrieve the authoritative Ground Truth vs System Independence Audit Matrix",
+)
+def get_benchmark_provenance_matrix_endpoint() -> List[MetricProvenanceAudit]:
+    """Retrieve fine-grained provenance audit distinguishing independent vs telemetry-consistency metrics.
+
+    CRITICAL SCIENTIFIC INTEGRITY (PROMPT 20):
+        Identifies whether ground truth and system sources share underlying computational pathways
+        to prevent circular evaluation.
+    """
+    service = get_benchmark_service()
+    return service.get_provenance_matrix()
+
+
+@router.get(
+    "/benchmark/splits",
+    response_model=Dict[str, Any],
+    summary="Retrieve leakage-free group-aware cross-validation splits (LOCO / LOSO / LOEO)",
+)
+def get_benchmark_group_splits_endpoint(
+    split_type: str = Query("circuit", description="Grouping dimension: 'circuit', 'season', or 'event'"),
+) -> Dict[str, Any]:
+    """Retrieve Leave-One-Circuit-Out, Leave-One-Season-Out, or Leave-One-Event-Out partitions."""
+    service = get_benchmark_service()
+    return service.get_group_splits(split_type=split_type)
+
+
+@router.get(
+    "/benchmark/comparator-evaluation",
+    response_model=ComparatorEvaluationReport,
+    summary="Retrieve evaluation report for historical comparable incident engine",
+)
+def get_comparator_evaluation_endpoint(
+    top_k: int = Query(3, ge=1, le=10, description="Top-k matches to evaluate"),
+) -> ComparatorEvaluationReport:
+    """Evaluate observable physical similarity and assert zero precedent/penalty leakage."""
+    service = get_benchmark_service()
+    return service.evaluate_comparator(top_k=top_k)
+
 
 
 
