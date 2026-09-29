@@ -85,8 +85,8 @@ Backend documentation will be accessible at `http://localhost:8000/docs`.
 ### Frontend Setup
 
 ```bash
-# Return to repository root
-cd ..
+# Navigate to frontend directory
+cd frontend
 
 # 1. Install frontend dependencies
 npm install
@@ -149,6 +149,6 @@ cd backend
 python -m pytest -v
 
 # 3. Test Frontend Production Build
-cd ..
+cd ../frontend
 npm run build
 ```

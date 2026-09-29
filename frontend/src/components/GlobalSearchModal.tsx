@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, AlertTriangle, Users, Flag, BookOpen, ArrowRight } from 'lucide-react';
-import { MOCK_INCIDENTS, MOCK_DRIVERS, MOCK_RACES, MOCK_REGULATION_LIBRARY } from '../lib/mockData';
+import { getIncidents, getDrivers, getRaces, getRegulations } from '../lib/api';
+import { Incident, Driver, Race, RelevantRegulation } from '../lib/types';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -14,11 +15,19 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   onNavigate,
 }) => {
   const [query, setQuery] = useState('');
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [races, setRaces] = useState<Race[]>([]);
+  const [regulations, setRegulations] = useState<RelevantRegulation[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
+      getIncidents().then(setIncidents);
+      getDrivers().then(setDrivers);
+      getRaces().then(setRaces);
+      getRegulations().then(setRegulations);
     } else {
       setQuery('');
     }
@@ -44,7 +53,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const q = query.toLowerCase().trim();
 
   const matchingIncidents = q
-    ? MOCK_INCIDENTS.filter(
+    ? incidents.filter(
         (inc) =>
           inc.id.toLowerCase().includes(q) ||
           inc.driverA.toLowerCase().includes(q) ||
@@ -54,10 +63,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           `${inc.driverA} ${inc.driverB}`.toLowerCase().includes(q) ||
           `lap ${inc.lap}`.includes(q)
       )
-    : MOCK_INCIDENTS.slice(0, 3);
+    : incidents.slice(0, 3);
 
   const matchingDrivers = q
-    ? Object.values(MOCK_DRIVERS).filter(
+    ? drivers.filter(
         (d) =>
           d.code.toLowerCase().includes(q) ||
           d.name.toLowerCase().includes(q) ||
@@ -66,16 +75,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     : [];
 
   const matchingRegulations = q
-    ? MOCK_REGULATION_LIBRARY.filter(
+    ? regulations.filter(
         (r) =>
           r.article.toLowerCase().includes(q) ||
           r.title.toLowerCase().includes(q) ||
-          r.whyRelevant.toLowerCase().includes(q)
+          (r.whyRelevant && r.whyRelevant.toLowerCase().includes(q))
       )
-    : MOCK_REGULATION_LIBRARY.slice(0, 2);
+    : regulations.slice(0, 2);
 
   const matchingRaces = q
-    ? MOCK_RACES.filter(
+    ? races.filter(
         (r) =>
           r.name.toLowerCase().includes(q) ||
           r.circuit.toLowerCase().includes(q) ||

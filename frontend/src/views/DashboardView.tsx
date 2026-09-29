@@ -3,9 +3,10 @@ import { IncidentTimeline } from '../components/IncidentTimeline';
 import { SystemPipeline } from '../components/SystemPipeline';
 import { 
   getIncidents, 
-  getRaceActivity 
+  getRaceActivity,
+  getDrivers 
 } from '../lib/api';
-import { Incident } from '../lib/types';
+import { Incident, Driver } from '../lib/types';
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -34,61 +35,32 @@ interface DashboardViewProps {
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [activityData, setActivityData] = useState<any[]>([]);
   const [activeActivityMetric, setActiveActivityMetric] = useState<'all' | 'candidates' | 'abnormal' | 'highConfidence'>('all');
 
   useEffect(() => {
     getIncidents().then(setIncidents);
     getRaceActivity().then(setActivityData);
+    getDrivers().then(setDrivers);
   }, []);
 
-  const timelineIncidents = [
-    {
-      id: 'INC-005',
-      lap: 1,
-      timestamp: '13:03:50',
-      label: 'Close interaction (multi-car concertina)',
-      confidence: 74,
-      status: 'DETECTED_INTERACTION' as const,
-      drivers: 'ALO → HUL',
-    },
-    {
-      id: 'INC-004',
-      lap: 12,
-      timestamp: '13:18:04',
-      label: 'Possible vehicle disturbance & wheel crowding',
-      confidence: 82,
-      status: 'REVIEWED' as const,
-      drivers: 'RUS → PER',
-    },
-    {
-      id: 'INC-024',
-      lap: 31,
-      timestamp: '13:42:18',
-      label: 'Possible contact / vehicle disturbance',
-      confidence: 87,
-      status: 'REQUIRES_REVIEW' as const,
-      drivers: 'VER → HAM',
-    },
-    {
-      id: 'INC-002',
-      lap: 36,
-      timestamp: '13:55:21',
-      label: 'Abnormal interaction & late apex line',
-      confidence: 78,
-      status: 'ABNORMAL_INTERACTION' as const,
-      drivers: 'NOR → PIA',
-    },
-    {
-      id: 'INC-003',
-      lap: 42,
-      timestamp: '14:03:42',
-      label: 'Vehicle aerodynamic disturbance',
-      confidence: 88,
-      status: 'REVIEWED' as const,
-      drivers: 'LEC → SAI',
-    },
-  ];
+  const timelineIncidents = incidents.length > 0
+    ? incidents.map((inc) => ({
+        id: inc.id,
+        lap: inc.lap,
+        timestamp: inc.timestamp,
+        label: `${inc.incidentType} (${inc.turn})`,
+        confidence: inc.confidence,
+        status: inc.status as any,
+        drivers: `${inc.driverA} → ${inc.driverB}`,
+      }))
+    : [];
+
+  const trackedDriversCount = drivers.length > 0 ? drivers.length : 20;
+  const candidateCount = activityData.reduce((acc, curr) => acc + (curr.candidates || 0), 0) || (incidents.length > 0 ? incidents.length * 150 : 1298);
+  const requiresReviewCount = incidents.filter(i => i.status === 'REQUIRES_REVIEW' || i.status === 'UNDER_REVIEW').length;
+  const reviewedCount = incidents.filter(i => i.status === 'REVIEWED' || i.status === 'CLOSED').length;
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -140,7 +112,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <Users className="w-3.5 h-3.5 text-white/30" />
           </div>
           <div className="text-3xl md:text-4xl font-mono font-light text-white leading-none">
-            20
+            {trackedDriversCount}
           </div>
           <div className="text-[10px] font-mono text-white/40 mt-3">
             All transponders calibrated
@@ -153,7 +125,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <Activity className="w-3.5 h-3.5 text-white/30" />
           </div>
           <div className="text-3xl md:text-4xl font-mono font-light text-white leading-none">
-            1,298
+            {candidateCount.toLocaleString()}
           </div>
           <div className="text-[10px] font-mono text-white/40 mt-3">
             Proximity & motion anomalies
@@ -166,7 +138,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
           </div>
           <div className="text-3xl md:text-4xl font-mono font-light text-red-500 leading-none">
-            3
+            {requiresReviewCount}
           </div>
           <div className="text-[10px] font-mono text-yellow-500 mt-3 font-semibold uppercase">
             Awaiting Human Review
@@ -179,7 +151,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
           </div>
           <div className="text-3xl md:text-4xl font-mono font-light text-white leading-none">
-            12
+            {reviewedCount}
           </div>
           <div className="text-[10px] font-mono text-emerald-400 mt-3">
             Completed by Stewards

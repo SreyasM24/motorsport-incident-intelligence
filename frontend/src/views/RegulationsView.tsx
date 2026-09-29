@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getRegulations } from '../lib/api';
 import { RelevantRegulation } from '../lib/types';
-import { MOCK_REGULATION_LIBRARY } from '../lib/mockData';
 import { Search, ExternalLink, Scale, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface RegulationsViewProps {
@@ -15,13 +14,16 @@ export const RegulationsView: React.FC<RegulationsViewProps> = ({ onNavigate }) 
   const [selectedDoc, setSelectedDoc] = useState<string>('ALL');
   const [selectedArticle, setSelectedArticle] = useState<string>('ALL');
   const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
-  const [regulations, setRegulations] = useState<RelevantRegulation[]>(MOCK_REGULATION_LIBRARY);
+  const [regulations, setRegulations] = useState<RelevantRegulation[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     getRegulations(search).then((data) => {
       if (data && data.length > 0) {
         setRegulations(data);
       }
+      setLoading(false);
     });
   }, [search]);
 
@@ -151,13 +153,22 @@ export const RegulationsView: React.FC<RegulationsViewProps> = ({ onNavigate }) 
 
       {/* Regulation Results (Section 10 Exact Specifications) */}
       <div className="space-y-4">
-        {filtered.map((reg) => {
-          const isExpanded = expandedArticleId === reg.id;
-          return (
-            <div
-              key={reg.id}
-              className="bg-[#0d0d0f] border border-white/10 rounded-sm p-6 hover:border-white/20 transition-colors space-y-4"
-            >
+        {loading && regulations.length === 0 ? (
+          <div className="p-12 text-center text-white/40 font-mono text-xs bg-[#0d0d0f] border border-white/10 rounded-sm">
+            Loading FIA regulations index...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center text-white/40 font-mono text-xs bg-[#0d0d0f] border border-white/10 rounded-sm">
+            No regulations match current filter parameters.
+          </div>
+        ) : (
+          filtered.map((reg) => {
+            const isExpanded = expandedArticleId === reg.id;
+            return (
+              <div
+                key={reg.id}
+                className="bg-[#0d0d0f] border border-white/10 rounded-sm p-6 hover:border-white/20 transition-colors space-y-4"
+              >
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold font-mono text-red-500 bg-white/5 px-2.5 py-1 rounded-sm border border-white/10 uppercase">
@@ -218,7 +229,7 @@ export const RegulationsView: React.FC<RegulationsViewProps> = ({ onNavigate }) 
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
     </div>
   );

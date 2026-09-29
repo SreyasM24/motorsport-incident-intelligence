@@ -12,15 +12,38 @@
 
 ---
 
-## Non-Adjudicative Philosophy & Epistemic Boundaries
+## 1. Problem Statement & Mission
 
-> **CRITICAL ARCHITECTURAL PRINCIPLE:**
+### The Problem
+Adjudicating racing incidents at elite motorsport levels (Formula 1, WEC, IMSA) is fraught with extreme cognitive demands:
+- **Telemetry Complexity**: Multi-car sessions generate gigabytes of sensor readings at 25Hz+ (throttle, brake line pressure, steer angles, RPM, DRS, GPS coordinates, IMU 3-axis accelerations).
+- **Time Pressure**: Stewards are expected to evaluate complex corner interactions, crowding claims, and collision trajectories in minutes during live safety cars or red flag periods.
+- **Optical Limitations & Parallax**: Broadcast television cameras use variable focal lenses and oblique perspective angles that create deceptive depth compression, obscuring whether an overtaking car maintained front-axle overlap at corner turn-in.
+- **Cognitive Fatigue**: Human officiating under race conditions can suffer from inconsistent precedent application and information overload.
+
+### Why It Matters
+Sporting penalties (time penalties, grid drops, license penalty points) dictate world championships and carry millions in commercial value.Officiating decisions must be backed by transparent, deterministic, physically grounded evidence rather than subjective visual impressions.
+
+### The Solution & Unique Selling Proposition (USP)
+MII provides a **deterministic multi-modal evidence pipeline**:
+1. **Mathematical Spatial Reconstruction**: Reconstructs physical car coordinates, apex clearance distance ($\Delta \text{Apex}$), relative velocity vectors, and corner-phase trajectory convergence.
+2. **Dynamic Reference Baselines**: Computes delta metrics against nominal clean-lap baselines (e.g., $+14\text{m}$ deeper braking point, $-0.85\text{G}$ anomalous yaw deceleration).
+3. **Computer Vision Vehicle Tracking**: Bounded vehicle detection and visual identity tracking linked to video timestamps.
+4. **Automated Discrepancy Analysis**: Detects contradictions between sensor streams (e.g., visual contact detected without corresponding IMU acceleration impulse).
+5. **Epistemic Integrity**: Enforces strict boundaries between objective physical observation and human sporting judgment.
+
+---
+
+## 2. Non-Adjudicative Philosophy & Epistemic Boundaries
+
+> [!IMPORTANT]
+> **CRITICAL ARCHITECTURAL PRINCIPLE: EVIDENCE SYNTHESIS ONLY**
 > 
 > The system **OBSERVES, SYNCHRONIZES, RECONSTRUCTS, QUANTIFIES, AND SYNTHESIZES EVIDENCE**.
 > 
 > The system **DOES NOT**:
 > - Assign fault, guilt, or legal liability
-> - Determine driver intent or psychological state
+> - Determine driver intent, aggression, or psychological state
 > - Prescribe penalties, fines, or sporting sanctions
 > - Issue automated or autonomous steward rulings
 
@@ -28,73 +51,74 @@ Machine learning models within MII only categorize whether an observed interacti
 
 ---
 
-## System Pipeline Architecture
+## 3. System Pipeline Architecture
 
 ```mermaid
 flowchart TD
-    subgraph INGESTION["1. Data Ingestion & Caching"]
-        A[FastF1 Official Timing] --> C[Data Ingestion Hub]
-        B[OpenF1 Real-time Streams] --> C
-        C --> D[(Persistent Storage / Cache)]
+    subgraph INGESTION["1. Data Ingestion & Normalization"]
+        A[FastF1 Timing & Sensor Streams] --> C[Data Ingestion Hub]
+        B[OpenF1 Real-time Telemetry] --> C
+        C --> D[(Deterministic 25Hz Resampling Grid)]
     end
 
-    subgraph PREPROCESSING["2. Telemetry & Physics Preprocessing"]
-        D --> E[Resampling Grid @ 25Hz]
-        E --> F[Coordinate Normalization]
-        F --> G[Physical Boundary & Plausibility Validation]
+    subgraph PREPROCESSING["2. Physics Validation & Baselines"]
+        D --> E[Kinematic Validation: Velocity & Yaw Rate]
+        E --> F[Clean-Lap Reference Baseline Modeling]
+        F --> G[Differential Delta Engine: Braking & Throttle]
     end
 
     subgraph RECONSTRUCTION["3. Spatial & Geometric Reconstruction"]
-        G --> H[Trajectory Reconstruction & Curvature]
-        H --> I[Reference Lap Differential Baseline]
-        H --> J[Overtake Geometry & Corner Phase Mapping]
+        G --> H[2D Trajectory & Track Curvature Mapping]
+        H --> I[Overtake Geometry & Axle Overlap %]
+        H --> J[Apex Lateral Clearance & Convergence Rate]
     end
 
-    subgraph AI_CV["4. ML & Computer Vision Alignment"]
-        J --> K[Spatial-Temporal Interaction Classifier]
-        L[Broadcast / Onboard Video] --> M[Temporal Synchronization Matrix]
-        M --> N[YOLO Vehicle Detection & ByteTrack Visual Identity]
+    subgraph CV_SYNC["4. Computer Vision & Alignment"]
+        K[Broadcast / Onboard Video Feeds] --> L[Temporal Synchronization Matrix]
+        L --> M[YOLO Vehicle Detection & ByteTrack IDs]
+        M --> N[Visual Trajectory & Overlap Extraction]
     end
 
     subgraph SYNTHESIS["5. Multi-Modal Dossier & Review"]
-        K --> O[Multi-Modal Evidence Synthesis & Discrepancy Engine]
+        J --> O[Multi-Modal Evidence Synthesizer]
         N --> O
-        P[FIA Sporting Regulations KB] --> O
-        O --> Q[Comprehensive Incident Dossier]
-        Q --> R[Human Steward Decision-Support Console]
+        P[FIA Formula One Sporting Regulations] --> O
+        O --> Q[Cross-Modal Discrepancy Engine]
+        Q --> R[Immutable Incident Dossier Payload]
+        R --> S[Human Steward Officiating Console]
     end
 ```
 
 ---
 
-## Key Capabilities
+## 4. Key Subsystems & Capabilities
 
-1. **High-Frequency Telemetry Harmonization**: Ingests, resamples, and interpolates telemetry streams onto a deterministic 25Hz temporal grid with physical validation filters (velocity, longitudinal/lateral acceleration, slip angles).
-2. **Deterministic Overtake Geometry**: Evaluates corner entry, apex, and exit overlap percentages, lateral delta clearance, relative velocities, and trajectory convergence without human bias.
-3. **Reference Baseline Modeling**: Quantifies braking point deltas ($\Delta \text{Brake}$ in meters/milliseconds), throttle application timing, and steering aggression against historical clean racing laps.
-4. **Computer Vision & Video Synchronization**: Fuses broadcast footage with sub-second telemetry alignment, tracking vehicle bounding boxes, identifying liveries/numbers, and cross-referencing visual overlap against telemetry-derived clearance.
-5. **Cross-Modal Discrepancy Analysis**: Automatically flags contradictions (e.g., visual contact detected without corresponding $G$-force spike in telemetry, or steering trace mismatch with visual yaw rate).
-6. **Regulatory Semantic Retrieval**: Indexes the FIA Formula One Sporting Regulations and International Sporting Code, surfacing relevant articles (e.g., ISC Appendix L, Ch IV, Art 2) based on incident characteristics.
-7. **Complete Steward Audit Trail**: Tracks evidence review status, human annotations, concurrence/dissenting notes, and immutable decision logging.
+1. **Deterministic 25Hz Ingestion**: Normalizes asynchronous telemetry streams into uniform 40ms time intervals with strict physical boundary validation (velocity, slip angle, lateral/longitudinal acceleration bounds).
+2. **Reference Lap Differential Baseline**: Models driver behavior against historical clean racing laps to compute delta braking distances ($\Delta \text{Brake}$ in meters), throttle pick-up points, and steering angle divergence.
+3. **Overtake Geometry Engine**: Quantifies front-axle to rear-axle overlap percentage at corner entry, apex, and exit, calculating minimum lateral separation distance without human bias.
+4. **Computer Vision & Video Synchronization**: Maps broadcast footage to telemetry timestamps, maintaining vehicle tracking bounding boxes and cross-referencing visual overlap against sensor clearance.
+5. **Cross-Modal Discrepancy Engine**: Automatically flags contradictions between visual observations and physical telemetry (e.g., visual contact detected without corresponding IMU acceleration spike).
+6. **Regulatory Semantic Retrieval**: Indexes the FIA Formula One Sporting Regulations and International Sporting Code Appendix L, surfacing relevant articles (e.g., Article 33.4 crowding, Article 27.3 track limits) with contextual rationale.
+7. **Complete Steward Audit Trail**: Immutable logging of evidence review statuses, notes, and concurrence records ensuring full transparency and appeal readiness.
 
 ---
 
-## Real-World Validated Incident Case Studies
+## 5. Real-World Validated Incident Case Studies
 
 MII has been benchmarked and cross-validated against real-world Formula One race incidents:
 
 | Grand Prix | Lap | Turn | Involved Drivers | Regulatory Context | Key Quantified Metrics |
-| :--- | :--- | :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **2024 Italian GP** | Lap 15 | T8–T9 (Variante Ascari) | D. Ricciardo vs N. Hülkenberg | ISC Appendix L Ch IV Art 2(b) | $\Delta \text{Apex Lateral Clearance} = 0.42\text{m}$, Braking delta $+12\text{m}$ late vs reference |
 | **2024 Austrian GP** | Lap 64 | T3 (Remus) | M. Verstappen vs L. Norris | Driving Standards / Crowding | Divergence in lateral line: $1.8\text{m}$ inward shift under braking, $0.18\text{s}$ reaction window |
 
 ---
 
-## Technology Stack
+## 6. Technology Stack
 
 ### Backend & Analytics
-- **Language**: Python 3.11+
-- **API Framework**: FastAPI 0.115+ (Asynchronous ASGI)
+- **Language**: Python 3.11 / 3.12 / 3.13
+- **Framework**: FastAPI 0.115+ (Asynchronous ASGI)
 - **Data Ingestion**: FastF1, OpenF1 Client
 - **Scientific Computing**: NumPy, Pandas, SciPy, Scikit-learn
 - **Computer Vision**: OpenCV (headless), PyTorch, Torchvision, Ultralytics (YOLO)
@@ -103,8 +127,8 @@ MII has been benchmarked and cross-validated against real-world Formula One race
 
 ### Frontend & Steward Console
 - **Framework**: React 19, TypeScript 5.5+
-- **Build Tooling**: Vite 6, Tailwind CSS 3.4
-- **State & Data**: TanStack Query (React Query), Axios
+- **Build Tooling**: Vite 6, Tailwind CSS 4
+- **State & Data**: React Hooks, Fetch API with live/offline fallback
 - **Visualization**: Recharts, Canvas 2D Trajectory Visualizer, Lucide React Icons
 
 ### Infrastructure & Deployment
@@ -114,36 +138,36 @@ MII has been benchmarked and cross-validated against real-world Formula One race
 
 ---
 
-## Quick Start Guide
+## 7. Quick Start Guide
 
 ### Option 1: Full Stack via Docker Compose (Recommended)
 
-To launch the complete platform (Database, Backend API, and Frontend) in an isolated containerized environment:
+To launch the complete platform (PostgreSQL, FastAPI Backend, and Nginx/React Frontend) in an isolated containerized environment:
 
 ```bash
-# 1. Clone the repository
+# 1. Clone repository
 git clone https://github.com/SreyasM24/motorsport-incident-intelligence.git
 cd motorsport-incident-intelligence
 
-# 2. Configure environment variables
+# 2. Configure environment
 cp .env.example .env
 
 # 3. Build and launch all services
 docker compose up --build -d
 
-# 4. View container logs
-docker compose logs -f
+# 4. View container status
+docker compose ps
 ```
 
 Services will be accessible at:
-- **Web Application**: [http://localhost:3000](http://localhost:3000)
-- **FastAPI Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **API Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
+- **Steward Web Console**: [http://localhost:3000](http://localhost:3000)
+- **FastAPI Interactive Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **API Health Check**: [http://localhost:8000/api/v1/health/live](http://localhost:8000/api/v1/health/live)
 - **PostgreSQL Database**: `localhost:5432` (`motorsport_intelligence`)
 
 ---
 
-### Option 2: Local Development Setup
+### Option 2: Local Native Development Setup
 
 #### Prerequisites
 - **Python**: 3.11, 3.12, or 3.13
@@ -153,36 +177,39 @@ Services will be accessible at:
 #### Backend Setup
 
 ```bash
-# Navigate to backend directory
+# 1. Navigate to backend directory
 cd backend
 
-# Create and activate virtual environment
+# 2. Create and activate virtual environment
 python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
+# On Windows (PowerShell):
+.venv\Scripts\Activate.ps1
 # On Linux/macOS:
 source .venv/bin/activate
 
-# Install dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# Run database migrations
+# 4. Apply database schema migrations
 alembic upgrade head
 
-# Seed reference data and incident candidates
+# 5. Seed reference data and incident candidates
 python -m app.seeds.seed_all
 
-# Start FastAPI development server
+# 6. Start FastAPI development server
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 #### Frontend Setup
 
 ```bash
-# In project root:
+# 1. In a separate terminal, navigate to frontend directory
+cd frontend
+
+# 2. Install dependencies
 npm install
 
-# Start Vite development server
+# 3. Start Vite development server
 npm run dev
 ```
 
@@ -190,23 +217,31 @@ Visit [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## Verification & Testing
-
-The platform includes comprehensive test suites across both unit and integration levels.
+## 8. Verification & Testing
 
 ```bash
-# Run backend test suite
+# Backend unit & integration test suite
 cd backend
-python -m pytest -v
+python -m pytest app/tests -v -k "not test_postgresql_live"
 
-# Run frontend typecheck, linter, and production build
-npm run lint
+# Frontend type checking, linting, and production build
+cd ../frontend
+npx tsc --noEmit
 npm run build
 ```
 
 ---
 
-## Documentation Index
+## 9. Screenshot & Media Gallery
+
+> [!NOTE]
+> **Status: `SCREENSHOTS_NOT_AVAILABLE`**
+>
+> High-resolution UI captures of the Steward Console (Telemetry Synchronizer, Overtake Spatial Map, CV Bounding Box Overlay, and Multi-Modal Dossier Synthesizer) will be populated in `docs/assets/` during deployment validation. To generate screenshots locally, launch the development frontend at `http://localhost:5173` and capture relevant viewports into `docs/assets/`.
+
+---
+
+## 10. Documentation Index
 
 Detailed architectural specifications, evaluation reports, and operational guidelines are available in the [`docs/`](docs/) directory:
 
@@ -220,11 +255,11 @@ Detailed architectural specifications, evaluation reports, and operational guide
 
 ---
 
-## Repository Structure
+## 11. Repository Structure
 
 ```text
 motorsport-incident-intelligence/
-├── backend/
+├── backend/                  # FastAPI 0.115+ Python backend
 │   ├── alembic/              # Database schema migrations
 │   ├── app/
 │   │   ├── api/              # FastAPI route handlers
@@ -238,7 +273,7 @@ motorsport-incident-intelligence/
 │   │   ├── regulations/      # FIA regulatory semantic retrieval
 │   │   ├── schemas/          # Pydantic data validation schemas
 │   │   ├── services/         # Domain business logic and orchestrators
-│   │   └── tests/            # Automated test suite
+│   │   └── tests/            # Automated test suite (unit + integration)
 │   ├── Dockerfile            # Multi-stage production backend container
 │   └── requirements.txt      # Python dependencies
 ├── data/
@@ -252,20 +287,30 @@ motorsport-incident-intelligence/
 │   ├── evaluation.md
 │   ├── limitations.md
 │   └── deployment.md
-├── src/                      # React 19 TypeScript frontend
-│   ├── components/           # Telemetry charts, dossier views, visualizers
-│   ├── lib/                  # API client, types, utility helpers
-│   └── views/                # Steward dashboard and incident detail views
+├── frontend/                 # React 19 TypeScript frontend
+│   ├── public/               # Static assets & SVG icons
+│   ├── src/                  # Application source code
+│   │   ├── components/       # Telemetry charts, dossier views, visualizers
+│   │   ├── lib/              # API client, types, utility helpers
+│   │   └── views/            # Steward dashboard and incident detail views
+│   ├── Dockerfile            # Production multi-stage Nginx container
+│   ├── index.html            # Single-page application entry point
+│   ├── nginx.conf            # Containerized reverse proxy configuration
+│   ├── package.json          # Frontend npm dependencies
+│   ├── tsconfig.json         # TypeScript compiler configuration
+│   └── vite.config.ts        # Vite configuration
 ├── docker-compose.yml        # Multi-service production orchestration
-├── Dockerfile.frontend       # Multi-stage production frontend container
-├── nginx.conf                # Production reverse proxy configuration
+├── nginx.conf                # Root production reverse proxy configuration
+├── .dockerignore             # Docker build exclusions
+├── .gitignore                # Git exclusions
+├── .env.example              # Environment variables template
 └── README.md                 # Primary system documentation
 ```
 
 ---
 
-## License & Copyright
+## 12. License & Legal Disclaimer
 
 `LICENSE_NOT_SELECTED` — All rights reserved. Please contact repository maintainers for licensing and commercial evaluation terms.
 
-*Formula 1, F1, and related marks are trademarks of Formula One Licensing B.V. FastF1 and OpenF1 are independent open-source projects not affiliated with Formula One management.*
+*Formula 1, F1, and related marks are trademarks of Formula One Licensing B.V. FastF1 and OpenF1 are independent open-source projects not affiliated with Formula One management. All regulatory references refer to publicly available FIA Sporting Codes and International Sporting Code appendices.*
