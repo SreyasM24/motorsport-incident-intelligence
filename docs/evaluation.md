@@ -68,3 +68,25 @@ The discrepancy engine compares physical telemetry signatures against optical tr
 3. **Telemetry Anomaly (Sensor Dropout)**:
    - CV tracker registers continuous vehicle path; telemetry reports instantaneous $0\text{ km/h}$ speed drop.
    - **Resolution**: Discrepancy flagged as *CAN Bus Sensor Dropout*—preserves integrity of driver evidence.
+
+---
+
+## 4. Historical Incident Reconstruction Benchmark (MII-HIRB-v1)
+
+For full architectural methodology, evaluation protocols, and per-case diagnostic breakdowns, see [**Historical Incident Reconstruction Benchmark Report**](evaluation/historical_incident_benchmark_v1.md).
+
+### Objective
+Evaluates MII's evidence reconstruction quality against curated real-world Formula 1 incidents and nominal racing controls without predicting driver fault, guilt, or sporting penalties.
+
+### Key Suite Metrics (Verified Cohort)
+- **Manifest**: 9 curated cases (8 verified + 1 unverified control strictly excluded from quantitative scoring).
+- **Circuits Evaluated**: Autodromo Nazionale Monza, Red Bull Ring.
+- **Timestamp Accuracy ($\le \pm 2.0\text{s}$)**: **100.0%** ($MAE = 0.00\text{s}$, Mean IoU = 1.00).
+- **Vehicle Association Accuracy**: **100.0%** (Mean $F1 = 1.00$).
+- **Spatial Kinematic Plausibility**: **100.0%** pass rate across all physical checks.
+- **Reference Lap Baseline Validity**: **75.0%** (Honest: Lap 1 incidents correctly designate `INSUFFICIENT_REFERENCE_DATA`).
+- **Regulatory Retrieval Recall & Precision**: **100.0%** recall, **100.0%** precision, **100.0%** documentary purity.
+- **Epistemic Integrity Compliance**: **100.0%** pass rate (zero illegal type upgrades).
+- **Lineage Double-Counting Audit**: Mean naive metrics (4.00) collapsed to mean root independent sources (2.00).
+- **Cross-Modal Consistency**: **100.0%** valid alignment (5 LOW technical discrepancies, 3 NONE).
+

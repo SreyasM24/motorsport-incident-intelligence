@@ -57,6 +57,7 @@ class ConsistencyStatus(str, Enum):
 
 class DiscrepancySeverity(str, Enum):
     """Technical/alignment discrepancy magnitude. NOT a fault or guilt measure."""
+    NONE = "NONE"
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"

@@ -43,6 +43,12 @@ from app.schemas.review import (
     CandidatePersistResponse,
 )
 from app.services.candidate_persistence_service import CandidatePersistenceService
+from app.benchmark import (
+    BenchmarkSuiteReport,
+    CaseEvaluationReport,
+    ComparableIncidentMatch,
+    get_benchmark_service,
+)
 
 router = APIRouter(prefix="/analysis", tags=["Analysis & Candidate Reconstruction"])
 
@@ -460,6 +466,66 @@ def export_candidate_steward_dossier_json_endpoint(candidate_id: str) -> Dossier
     """Export machine-readable JSON dossier payload for external steward panels or FIA compliance."""
     steward_dossier = get_candidate_steward_dossier_endpoint(candidate_id)
     return get_steward_dossier_synthesizer().export_dossier_json(steward_dossier)
+
+
+# ==============================================================================
+# HISTORICAL INCIDENT RECONSTRUCTION BENCHMARK ENDPOINTS (PROMPT 19)
+# ==============================================================================
+
+@router.get(
+    "/benchmark/historical-incidents",
+    response_model=BenchmarkSuiteReport,
+    summary="Execute and retrieve the Historical Incident Reconstruction Benchmark Suite Report",
+)
+def get_historical_incident_benchmark_report_endpoint(
+    force_refresh: bool = Query(False, description="Re-run evaluation suite bypassing cache"),
+) -> BenchmarkSuiteReport:
+    """Execute multidimensional evidence quality evaluation over authoritative historical F1 incidents.
+
+    STRICT NON-ADJUDICATIVE PHILOSOPHY:
+        Evaluates evidence reconstruction quality only. Does not predict driver guilt,
+        assign fault, or recommend sporting penalties.
+    """
+    service = get_benchmark_service()
+    return service.run_benchmark_suite(force_refresh=force_refresh)
+
+
+@router.get(
+    "/benchmark/historical-incidents/{case_id}",
+    response_model=CaseEvaluationReport,
+    summary="Retrieve detailed evidence reconstruction evaluation for a specific historical benchmark case",
+)
+def get_historical_incident_case_evaluation_endpoint(case_id: str) -> CaseEvaluationReport:
+    """Retrieve fine-grained timestamp, vehicle, kinematic, regulatory, and epistemic evaluation for a case."""
+    service = get_benchmark_service()
+    report = service.evaluate_single_case(case_id)
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Historical benchmark case '{case_id}' not found.",
+        )
+    return report
+
+
+@router.get(
+    "/benchmark/historical-incidents/{case_id}/comparable",
+    response_model=List[ComparableIncidentMatch],
+    summary="Retrieve observable historically comparable incidents based on physical geometry",
+)
+def get_comparable_historical_incidents_endpoint(
+    case_id: str,
+    top_k: int = Query(3, ge=1, le=10, description="Maximum number of comparable cases to return"),
+) -> List[ComparableIncidentMatch]:
+    """Retrieve comparable incidents based strictly on observable kinematics and track geometry.
+
+    STRICT COMPLIANCE GUARDRAIL:
+        Past steward decisions are displayed strictly as documentary context.
+        Prior outcomes do NOT determine current guilt or penalty recommendations.
+    """
+    service = get_benchmark_service()
+    matches = service.find_comparable_cases(case_id=case_id, top_k=top_k)
+    return matches
+
 
 
 
