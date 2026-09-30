@@ -253,6 +253,8 @@ Detailed architectural specifications, evaluation reports, and operational guide
 - [**API Reference**](docs/api.md): REST endpoints, OpenAPI schemas, query parameters, and error responses.
 - [**Data Provenance & Ingestion**](docs/data-provenance.md): Provenance verification, caching policies, and physics validation.
 - [**Evaluation & Benchmark Metrics**](docs/evaluation.md): Machine learning and computer vision cross-circuit validation results.
+- [**Computer Vision Evaluation Foundation**](docs/evaluation/video_cv_evaluation.md): Real-world video manifest, dual-coordinate contracts, LOVO/LOEO splits, and 12-category failure taxonomy.
+- [**CV Dataset Card**](data/cv/DATASET_CARD.md): Real video manifest specification, copyright compliance, and non-adjudicative doctrine.
 - [**Steward Operating Workflow**](docs/steward-workflow.md): 14-step human-in-the-loop officiating procedure and jurisdictional boundary matrix.
 - [**Historical Reconstruction Benchmark**](docs/evaluation/historical_incident_benchmark_v1.md): Multi-circuit, multi-season decoupled evidence evaluation.
 - [**Benchmark Provenance Matrix**](docs/evaluation/benchmark_provenance_matrix.md): Ground truth vs. system independence audit preventing circular evaluation.

@@ -61,8 +61,70 @@ def query_assistant(
             EvidenceChip(label="RESPONSE: Steering Delta", type="response"),
             EvidenceChip(label="TRAJECTORY: Lateral Track Offset", type="timeline"),
         ]
-        links = [EvidenceLink(label="Open Telemetry Chart", target_view=f"incident-{incident_ref}", incident_id=incident_ref)]
-        follow_ups = ["Which regulations may be relevant?", "What evidence is missing?"]
+    elif any(k in query_lower for k in ["video", "footage", "camera", "cv", "visual", "onboard", "broadcast"]):
+        clean_ref = incident_ref.upper()
+        is_unavailable = (
+            clean_ref.startswith("REF-MONZA")
+            or clean_ref.startswith("REF-")
+            or clean_ref.startswith("CASE-HIST")
+            or clean_ref in {"INC-024", "INC-001", "INC-002", "INC-003"}
+        )
+
+        if is_unavailable:
+            text = (
+                f"VISUAL EVIDENCE STATUS FOR {incident_ref}: VIDEO_EVIDENCE_UNAVAILABLE\n\n"
+                "• COMMERCIAL COPYRIGHT RESTRICTION: Official Formula One Management (FOM) broadcast footage "
+                "and trackside CCTV are commercially protected and cannot be redistributed. Zero raw video frames are bundled.\n"
+                "• CV DETECTIONS & TRACKING: Unavailable for this incident.\n"
+                "• PRIMARY EVIDENCE BASE: Steward review relies on calibrated 25Hz CAN-bus telemetry (speed, throttle, brake, steering), "
+                "reference-lap kinematic anomaly detection, corner geometry apex analysis, and FIA Race Control documentation.\n\n"
+                "NON-ADJUDICATIVE NOTICE: The absence of video footage is treated as unobserved evidence, never as an inference of fault or guilt."
+            )
+            chips = [
+                EvidenceChip(label="Status: VIDEO_EVIDENCE_UNAVAILABLE", type="status"),
+                EvidenceChip(label="Reason: COPYRIGHT_RESTRICTION", type="evidence"),
+                EvidenceChip(label="Primary: FastF1 Telemetry", type="telemetry"),
+            ]
+            links = [
+                EvidenceLink(label=f"Review Incident {incident_ref} Telemetry", target_view=f"incident-{incident_ref}", incident_id=incident_ref)
+            ]
+            follow_ups = ["What changed in the telemetry?", "Which regulations may be relevant?", "Why was this incident flagged?"]
+        else:
+            text = (
+                f"Visual evidence for {incident_ref} is MODEL_DERIVED from computer vision detection and tracking pipelines.\n\n"
+                "• DETECTIONS & BOUNDING BOXES: Inferred 2D vehicle bounding boxes from calibrated video frames.\n"
+                "• TRACKING & CONTINUITY: Multi-object tracking (MOT) associations across consecutive frames.\n"
+                "• DRIVER IDENTITY ATTRIBUTION: Certainty status is INSUFFICIENT_DATA unless independently verified by human stewards.\n"
+                "• CROSS-MODAL SYNCHRONIZATION: Any spatial discrepancy between 2D image coordinates and telemetry track projection is an "
+                "evidence-quality and sensor calibration flag, NOT an indication of driver fault."
+            )
+            chips = [
+                EvidenceChip(label="CV: MODEL_DERIVED", type="evidence"),
+                EvidenceChip(label="Identity: INSUFFICIENT_DATA", type="status"),
+                EvidenceChip(label="Discrepancy: Evidence-Quality Flag", type="evidence"),
+            ]
+            links = [
+                EvidenceLink(label="Inspect Visual Evidence", target_view=f"incident-{incident_ref}", incident_id=incident_ref)
+            ]
+            follow_ups = ["What changed in the telemetry?", "Which regulations may be relevant?"]
+
+    elif "missing" in query_lower:
+        text = (
+            f"Evidence completeness audit for candidate {incident_ref}:\n\n"
+            "• TELEMETRY EVIDENCE: COMPLETE (25Hz CAN-bus speed, throttle, brake pressure, steering angle, gear).\n"
+            "• REFERENCE BASELINE: COMPLETE (Driver and teammate nominal reference-lap comparison).\n"
+            "• CORNER GEOMETRY: COMPLETE (Apex position, lateral separation, track boundaries).\n"
+            "• REGULATORY GROUNDING: COMPLETE (FIA statutory articles and driving standards guidelines).\n"
+            "• VISUAL/VIDEO EVIDENCE: VIDEO_EVIDENCE_UNAVAILABLE (FOM commercial copyright restrictions prevent raw broadcast bundling).\n\n"
+            "Non-adjudication doctrine: Missing visual evidence is cataloged as unobserved data, never negative evidence or driver guilt."
+        )
+        chips = [
+            EvidenceChip(label="Telemetry: COMPLETE", type="telemetry"),
+            EvidenceChip(label="Visual: VIDEO_EVIDENCE_UNAVAILABLE", type="status"),
+            EvidenceChip(label="Doctrine: NON_ADJUDICATIVE", type="regulation"),
+        ]
+        links = [EvidenceLink(label=f"Examine {incident_ref}", target_view=f"incident-{incident_ref}", incident_id=incident_ref)]
+        follow_ups = ["Why was this incident flagged?", "What changed in the telemetry?", "Which regulations may be relevant?"]
 
     elif any(k in query_lower for k in ["regulation", "rule", "code", "guideline", "article", "overtaking", "track limits", "penalty"]):
         import re

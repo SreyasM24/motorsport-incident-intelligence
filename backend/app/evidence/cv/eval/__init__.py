@@ -15,6 +15,14 @@ from app.evidence.cv.eval.contracts import (
     IncidentVisualEvidenceSufficiency,
     StewardReadinessRating,
     TrackingEvaluationMetrics,
+    VideoAuthorizationStatus,
+    VideoDatasetCatalog,
+    VideoDatasetRecord,
+    VideoSourceType,
+    convert_normalized_to_pixel,
+    convert_pixel_to_normalized,
+    validate_annotation,
+    validate_annotation_sequence,
 )
 from app.evidence.cv.eval.detector_eval import DetectionEvaluator
 from app.evidence.cv.eval.tracker_eval import TrackingEvaluator
@@ -44,5 +52,13 @@ __all__ = [
     "StewardReadinessRating",
     "TrackingEvaluationMetrics",
     "TrackingEvaluator",
+    "VideoAuthorizationStatus",
+    "VideoDatasetCatalog",
+    "VideoDatasetRecord",
+    "VideoSourceType",
+    "convert_normalized_to_pixel",
+    "convert_pixel_to_normalized",
     "get_cv_evaluation_service",
+    "validate_annotation",
+    "validate_annotation_sequence",
 ]

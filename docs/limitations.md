@@ -50,3 +50,22 @@ Telemetry reveals *what* the car did (throttle trace, steering angle, trajectory
 
 - **Network Dependency**: Live streaming features require reliable network connectivity to ingest OpenF1 feeds. In the event of network disruption, the system falls back to cached local storage.
 - **Circuit Baseline Availability**: Delta metrics (such as $\Delta \text{Brake}$) require at least 3 clean reference laps on comparable tire compounds and fuel loads. In changing weather conditions (e.g., intermediate wet to dry), reference lap validity degrades and is explicitly flagged as such.
+
+---
+
+## 5. Video Dataset Availability & Copyright Constraints (Prompt 22)
+
+### Commercial Broadcast Footage Restriction
+- Formula One Management (FOM) broadcast television footage, trackside CCTV, and onboard camera streams are protected by commercial copyright. Zero raw video frames from official Formula 1 broadcasts are distributed or bundled in this repository.
+- Consequently, real-world broadcast video status is formally designated as `INSUFFICIENT_DATA` (and `real_video_status = NOT_AVAILABLE`).
+- The system never substitutes synthetic fixtures as a proxy for real broadcast video accuracy.
+
+### Independent Driver Identity Attribution
+- Optical vehicle bounding boxes do not automatically infer driver identity. Attributing an optical track to a driver requires authoritative helmet annotations, high-resolution livery number OCR, or dedicated onboard camera telemetry.
+- Where independent ground-truth identity annotations are missing, the system strictly outputs `IDENTITY_EVALUATION = INSUFFICIENT_DATA`.
+
+### Cross-Modal Discrepancy Interpretation
+- Any spatial discrepancy between 2D optical bounding boxes and 2D telemetry track-plan coordinates, or temporal offsets between visual contact and deceleration peaks, represents an **evidence-quality flag** caused by lens distortion, frame rate quantization, or broadcast transmission lag.
+- Discrepancies **never** indicate driver fault, steering illegality, or sporting culpability.
+- Missing visual evidence is cataloged as unobserved data, never negative evidence against any competitor.
+

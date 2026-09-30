@@ -12,6 +12,7 @@ from app.evidence.cv import CVIncidentAnalysisResponse, get_cv_service
 from app.evidence.cv.eval import (
     CVEvaluationSuiteResponse,
     IncidentVisualEvidenceSufficiency,
+    VideoDatasetCatalog,
     get_cv_evaluation_service,
 )
 from app.evidence.synthesis import (
@@ -384,6 +385,20 @@ def get_reference_cases() -> List[dict]:
         }
         for ref in MONZA_2024_REFERENCE_CASES
     ]
+
+
+@router.get(
+    "/cv/dataset",
+    response_model=VideoDatasetCatalog,
+    summary="Retrieve canonical real video manifest catalog, authorization statuses, and split distributions",
+)
+def get_cv_dataset_catalog_endpoint() -> VideoDatasetCatalog:
+    """Retrieve catalog of real, research, and synthetic video records for CV evaluation.
+
+    Strictly reports real-world video availability and legal authorization statuses.
+    UNAUTHORIZED footage is strictly excluded from active evaluation pools.
+    """
+    return get_cv_evaluation_service().load_real_video_manifest()
 
 
 @router.get(

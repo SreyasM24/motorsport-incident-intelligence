@@ -6,7 +6,7 @@ CRITICAL GUARDRAIL:
     or Video/Camera.
 """
 
-from typing import Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 from app.evidence.cv.eval.contracts import DatasetSampleManifest
 
 
@@ -70,6 +70,86 @@ class GroupSplitter:
             "val": val_samples,
             "test": test_samples,
         }
+
+    @staticmethod
+    def leave_one_video_out(samples: List[DatasetSampleManifest]) -> List[Dict[str, Any]]:
+        """Generate Leave-One-Video-Out (LOVO) cross-validation folds.
+
+        Each fold holds out exactly one video as test, using remaining videos for train/val.
+        Guarantees zero frame leakage across video boundaries.
+        """
+        if not samples:
+            return []
+
+        videos: Dict[str, List[DatasetSampleManifest]] = {}
+        for s in samples:
+            v_key = s.source_video or s.sample_id
+            videos.setdefault(v_key, []).append(s)
+
+        video_keys = sorted(list(videos.keys()))
+        folds: List[Dict[str, Any]] = []
+
+        for held_out_idx, held_out_video in enumerate(video_keys):
+            test_samples = videos[held_out_video]
+            train_samples = [
+                s for v_key, s_list in videos.items() if v_key != held_out_video for s in s_list
+            ]
+
+            # Invariant check: no leakage
+            assert GroupSplitter.verify_no_leakage(train_samples, test_samples, group_key="source_video")
+
+            folds.append(
+                {
+                    "fold_index": held_out_idx,
+                    "held_out_video": held_out_video,
+                    "train_sample_count": len(train_samples),
+                    "test_sample_count": len(test_samples),
+                    "train_samples": train_samples,
+                    "test_samples": test_samples,
+                }
+            )
+
+        return folds
+
+    @staticmethod
+    def leave_one_event_out(samples: List[DatasetSampleManifest]) -> List[Dict[str, Any]]:
+        """Generate Leave-One-Event-Out (LOEO) cross-validation folds.
+
+        Each fold holds out an entire racing event (grand prix / circuit).
+        Guarantees zero environmental or track-geometry leakage into test set.
+        """
+        if not samples:
+            return []
+
+        events: Dict[str, List[DatasetSampleManifest]] = {}
+        for s in samples:
+            e_key = s.event or "DEFAULT_EVENT"
+            events.setdefault(e_key, []).append(s)
+
+        event_keys = sorted(list(events.keys()))
+        folds: List[Dict[str, Any]] = []
+
+        for held_out_idx, held_out_event in enumerate(event_keys):
+            test_samples = events[held_out_event]
+            train_samples = [
+                s for e_key, s_list in events.items() if e_key != held_out_event for s in s_list
+            ]
+
+            # Invariant check: no leakage
+            assert GroupSplitter.verify_no_leakage(train_samples, test_samples, group_key="event")
+
+            folds.append(
+                {
+                    "fold_index": held_out_idx,
+                    "held_out_event": held_out_event,
+                    "train_sample_count": len(train_samples),
+                    "test_sample_count": len(test_samples),
+                    "train_samples": train_samples,
+                    "test_samples": test_samples,
+                }
+            )
+
+        return folds
 
     @staticmethod
     def verify_no_leakage(

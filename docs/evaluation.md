@@ -134,4 +134,31 @@ Evaluated across 8 gold ground-truth queries representing complex motorsport inv
 3. **Source Conflict Transparency**: Discrepancies between editions (e.g. 2023 vs 2024 Driving Standards Guidelines) raise `SOURCE_CONFLICT` flags rather than silent heuristic overrides.
 4. **Strict Precedent Isolation**: Historical steward rulings are segregated into isolated documentary context and never converted into automated fault or penalty predictions.
 
+---
+
+## 7. Computer Vision & Real-World Video Evaluation Foundation (Prompt 22)
+
+For full architectural documentation, annotation pipeline schemas, cross-modal contracts, and evaluation methodology, see:
+- [**Computer Vision Evaluation Foundation Report**](evaluation/video_cv_evaluation.md)
+- [**Video Dataset Card**](../data/cv/DATASET_CARD.md)
+- [**Real Video Manifest**](../data/cv/real_video_manifest.json)
+
+### Real-World Video Status
+```
+REAL_WORLD_VIDEO_STATUS = INSUFFICIENT_DATA
+```
+- **Copyright Compliance**: Official Formula One Management (FOM) broadcast footage is commercially copyrighted and legally restricted. Zero raw broadcast video frames are bundled in this repository.
+- **Honest Transparency**: The platform strictly avoids claiming unverified real-world video accuracy or deceptively substituting synthetic datasets. Real broadcast video status is reported as `INSUFFICIENT_DATA` / `NOT_AVAILABLE`.
+- **Authorized Research Cohort**: Evaluated across verified open research datasets (F1TENTH Autonomous Racing CC-BY 4.0, Indy Autonomous Challenge Apache 2.0, UA-DETRAC CC-BY-NC-SA 3.0) and deterministic simulation fixtures.
+
+### Key Evaluation Capabilities
+- **Canonical Dataset Contract**: Manifest cataloging video records with series, season, session, camera ID, source URL, license, and legal authorization status (`AVAILABLE`, `AUTHORIZED`, `UNAUTHORIZED`, `PENDING_REVIEW`, `UNAVAILABLE`, `SYNTHETIC`). Invariant: `UNAUTHORIZED` is strictly quarantined.
+- **Dual-Coordinate System**: Guaranteed lossless clamping and round-trip conversion between `NORMALIZED_0_1` and `PIXEL_ABSOLUTE`.
+- **Automated Validation**: Rigorous checks for normalized bounds, pixel dimension clipping, frame sequence monotonicity, and duplicate track IDs.
+- **Group-Aware Splitting**: Leave-One-Video-Out (LOVO) and Leave-One-Event-Out (LOEO) cross-validation folds ensuring zero temporal or circuit feature leakage.
+- **12-Category Failure Taxonomy**: Exhaustive classification covering `DETECTION_MISS`, `FALSE_DETECTION`, `OCCLUSION`, `TRUNCATION`, `TRACK_FRAGMENTATION`, `ID_SWITCH`, `IDENTITY_UNAVAILABLE`, `TIMESTAMP_MISALIGNMENT`, `CAMERA_GEOMETRY`, `INSUFFICIENT_RESOLUTION`, `VIDEO_UNAVAILABLE`, and `OTHER`.
+- **Independent Identity Attribution**: Mandates `IDENTITY_EVALUATION = INSUFFICIENT_DATA` when independent livery or helmet ground truth is absent.
+- **Non-Adjudicative Cross-Modal Discrepancy**: Cross-modal spatial and temporal offsets represent sensor alignment and calibration uncertainty—they NEVER indicate driver fault or sporting guilt.
+
+
 

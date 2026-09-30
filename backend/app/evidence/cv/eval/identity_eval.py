@@ -1,7 +1,7 @@
 """Driver visual identity evaluation engine.
 
 Measures accuracy of driver attribution against certified ground truth annotations.
-Honestly reports NOT_AVAILABLE when real identity ground truth is absent.
+Honestly reports INSUFFICIENT_DATA when independent real identity ground truth is absent.
 """
 
 from typing import Dict, List, Optional
@@ -24,10 +24,11 @@ class IdentityEvaluator:
     ) -> IdentityEvaluationMetrics:
         """Evaluate identity associations.
 
-        CRITICAL GUARDRAIL:
-            Do not infer real-world identity accuracy from synthetic fixtures.
-            If is_synthetic is True or ground-truth identity annotations are missing,
-            report NOT_AVAILABLE for real benchmark accuracy.
+        CRITICAL GUARDRAIL (Prompt 22):
+            Driver identity attribution requires authoritative camera metadata, helmet, or
+            car livery annotations. If not independently verified, MUST report
+            IDENTITY_EVALUATION = INSUFFICIENT_DATA.
+            Never infer or fabricate real-world identity accuracy from synthetic fixtures.
         """
         # Filter GT that have an identity label
         annotated_gt = [
@@ -35,14 +36,25 @@ class IdentityEvaluator:
             if gt.identity_status == AnnotationIdentityStatus.CONFIRMED and gt.identity_label
         ]
 
-        if not annotated_gt or is_synthetic:
+        if is_synthetic:
             return IdentityEvaluationMetrics(
                 evaluation_status="NOT_AVAILABLE",
                 total_evaluated=len(annotated_gt),
                 statement=(
-                    "Real-world driver identity evaluation is NOT_AVAILABLE. Official broadcast video "
-                    "car livery/helmet/onboard metadata annotations are not present in dataset. "
+                    "Real-world driver identity evaluation is NOT_AVAILABLE (INSUFFICIENT_DATA). "
+                    "Official broadcast video car livery/helmet/onboard metadata annotations are not present. "
                     "Accuracy metrics will not be claimed from synthetic test fixtures."
+                ),
+            )
+
+        if not annotated_gt:
+            return IdentityEvaluationMetrics(
+                evaluation_status="INSUFFICIENT_DATA",
+                total_evaluated=0,
+                statement=(
+                    "Driver identity evaluation status: INSUFFICIENT_DATA. "
+                    "Independent optical livery, helmet, or car number ground truth annotations "
+                    "are not present in dataset. Real-world accuracy metrics cannot be asserted."
                 ),
             )
 

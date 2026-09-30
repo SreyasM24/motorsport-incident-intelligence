@@ -281,3 +281,102 @@ Executes the gold retrieval evaluation benchmark and returns Precision@k, Recall
 
 ### `GET /api/v1/evidence/integrity`
 Audits document SHA-256 hashes and confirms zero orphaned text chunks.
+
+---
+
+## 7. Computer Vision & Real-World Video Evaluation Endpoints (Prompt 22)
+
+### `GET /api/v1/analysis/cv/dataset`
+Retrieves the canonical catalog of video dataset records, legal authorization statuses, and split distributions from `data/cv/real_video_manifest.json`.
+
+**Response `200 OK`**:
+```json
+{
+  "manifestVersion": "2.0",
+  "datasetName": "Motorsport Video & Computer Vision Evaluation Dataset",
+  "description": "Canonical catalog of real-world, research, and synthetic video records for motorsport CV evaluation.",
+  "realWorldVideoStatus": "INSUFFICIENT_DATA",
+  "licensePolicy": "Strict copyright compliance: Official Formula One Management (FOM) broadcast footage is commercially copyrighted...",
+  "totalVideos": 12,
+  "totalDurationSeconds": 248.5,
+  "byAuthorizationStatus": {
+    "UNAVAILABLE": 6,
+    "AUTHORIZED": 4,
+    "SYNTHETIC": 1,
+    "UNAUTHORIZED": 1
+  },
+  "bySeries": {
+    "Formula 1": 7,
+    "F1TENTH Autonomous Racing": 2,
+    "Indy Autonomous Challenge": 1,
+    "UA-DETRAC Benchmark": 1,
+    "Synthetic Motorsport Simulation": 1
+  },
+  "bySplit": {
+    "BENCHMARK_EVAL": 6,
+    "TRAIN": 1,
+    "VAL": 1,
+    "TEST": 4
+  },
+  "videos": [...],
+  "datasetCardUrl": "/data/cv/DATASET_CARD.md"
+}
+```
+
+### `GET /api/v1/analysis/cv/evaluation`
+Retrieves the comprehensive Computer Vision evaluation suite report, 12-category failure taxonomy breakdown, LOVO / LOEO leakage-free cross-validation folds, and honest `real_world_video_status`.
+
+**Response `200 OK`**:
+```json
+{
+  "realWorldVideoStatus": "INSUFFICIENT_DATA",
+  "realVideoStatus": "NOT_AVAILABLE",
+  "evaluationStatus": "SYNTHETIC_VALIDATION_ONLY",
+  "datasetCatalog": { ... },
+  "detectionMetrics": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1Score": 1.0,
+    "meanIou": 1.0,
+    "iouThreshold": 0.50
+  },
+  "trackingMetrics": { ... },
+  "identityMetrics": {
+    "evaluationStatus": "INSUFFICIENT_DATA",
+    "statement": "Driver identity evaluation requires authoritative camera metadata or helmet/car livery annotations."
+  },
+  "crossModalMetrics": {
+    "evaluationStatus": "NOT_AVAILABLE",
+    "spatialAlignmentStatus": "NOT_EVALUATED",
+    "discrepancyInterpretation": "DISCREPANCY_IS_EVIDENCE_QUALITY_FLAG_NOT_DRIVER_FAULT"
+  },
+  "failureCategories": {
+    "DETECTION_MISS": 0,
+    "FALSE_DETECTION": 0,
+    "OCCLUSION": 0,
+    "TRUNCATION": 0,
+    "TRACK_FRAGMENTATION": 0,
+    "ID_SWITCH": 0,
+    "IDENTITY_UNAVAILABLE": 0,
+    "TIMESTAMP_MISALIGNMENT": 0,
+    "CAMERA_GEOMETRY": 0,
+    "INSUFFICIENT_RESOLUTION": 0,
+    "VIDEO_UNAVAILABLE": 0,
+    "OTHER": 0
+  },
+  "splitsEvaluation": {
+    "lovo": { "numFolds": 2, "strategy": "Leave-One-Video-Out", "leakageStatus": "ZERO_LEAKAGE_VERIFIED" },
+    "loeo": { "numFolds": 2, "strategy": "Leave-One-Event-Out", "leakageStatus": "ZERO_LEAKAGE_VERIFIED" }
+  },
+  "stewardNotice": "EVALUATION PURPOSE ONLY: Visual metrics, detections, and tracks are descriptive evidence..."
+}
+```
+
+### `GET /api/v1/analysis/candidates/{candidate_id}/video/cv`
+Retrieves full Computer Vision vehicle detections, multi-object tracks, quality ratings, and identity associations for an incident candidate. Returns `VIDEO_UNAVAILABLE` honestly when broadcast video is commercially restricted or unlinked.
+
+### `GET /api/v1/analysis/candidates/{candidate_id}/video/cv/sufficiency`
+Evaluates whether visual evidence is sufficient for human steward review (`SUFFICIENT`, `PARTIALLY_SUFFICIENT`, `INSUFFICIENT`, or `UNAVAILABLE`).
+- For commercial cases with unlinked video, returns `steward_readiness: "UNAVAILABLE"` and `VIDEO_EVIDENCE_UNAVAILABLE`.
+- Emphasizes that absence of video is unobserved data, never negative evidence or driver guilt.
+
