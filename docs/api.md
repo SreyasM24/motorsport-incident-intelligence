@@ -218,3 +218,66 @@ Submits a licensed human steward review assessment.
   "timestamp": "2026-09-29T08:15:32Z"
 }
 ```
+
+---
+
+## 7. Citation-Grounded Evidence & Knowledge Retrieval (Prompt 21)
+
+### `GET /api/v1/evidence/regulations/search`
+Retrieves citation-grounded regulatory passages from canonical FIA sporting regulations and Driving Standards Guidelines.
+
+**Query Parameters**:
+- `query` (required, string): Natural-language or statutory query (e.g. `leaving room on exit`).
+- `season` (optional, integer, default `2024`): Championship season filter.
+- `method` (optional, string, default `hybrid`): Retrieval strategy (`lexical`, `semantic`, `hybrid`).
+- `case_date` (optional, string): Incident ISO date (`YYYY-MM-DD`) for temporal applicability filtering.
+- `article_filter` (optional, string): Substring filter for article numbers (e.g. `33.3`).
+- `limit` (optional, integer, default `5`): Maximum citations to return.
+
+**Response `200 OK`**:
+```json
+{
+  "queryInterpreted": "leaving room on exit",
+  "totalFound": 3,
+  "citations": [
+    {
+      "claim": "Potentially applicable regulatory provision for observed racing engagement.",
+      "source": "FIA World Motor Sport Council",
+      "documentName": "FIA Formula One Sporting Regulations 2024",
+      "articleNumber": "Article 33.3",
+      "heading": "Track Limits and Leaving the Track",
+      "verbatimText": "Drivers must make every reasonable effort to use the track at all times...",
+      "relevanceScore": 0.88,
+      "retrievalMethod": "HYBRID_LEXICAL_SEMANTIC",
+      "provenanceStatus": "AUTHORITATIVE",
+      "epistemicNotice": "CRITICAL NOTICE: Regulatory citations are documentary references only..."
+    }
+  ],
+  "conflicts": [],
+  "effectiveDateFilterApplied": false,
+  "seasonFilterApplied": true,
+  "nonAdjudicationStatement": "CRITICAL NON-ADJUDICATIVE NOTICE: Regulatory citations are documentary references only."
+}
+```
+
+### `GET /api/v1/evidence/historical/search`
+Searches verified historical incident records based purely on observable kinematics with precedent isolation.
+
+**Query Parameters**:
+- `query` (optional, string): Observable description query.
+- `case_id` (optional, string): Benchmark case identifier to find kinematically comparable matches for.
+- `circuit` (optional, string): Circuit filter.
+- `category` (optional, string): Interaction category filter (e.g. `FORCING_OFF_TRACK`).
+- `top_k` (optional, integer, default `5`): Maximum cases to return.
+
+### `GET /api/v1/evidence/documents/{document_id}`
+Returns full document metadata and registered child chunks.
+
+### `GET /api/v1/evidence/documents/{document_id}/chunks/{chunk_id}`
+Returns atomic chunk text, article number, and cryptographic SHA-256 hash.
+
+### `GET /api/v1/evidence/retrieval/benchmark`
+Executes the gold retrieval evaluation benchmark and returns Precision@k, Recall@k, and MRR.
+
+### `GET /api/v1/evidence/integrity`
+Audits document SHA-256 hashes and confirms zero orphaned text chunks.

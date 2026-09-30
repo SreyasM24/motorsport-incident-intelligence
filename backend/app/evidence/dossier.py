@@ -105,6 +105,9 @@ class IncidentEvidenceDossier(BaseModel):
     # Machine learning candidate evaluation (anomaly scoring without guilt/fault)
     ml_evidence: Optional[MLEvidence] = None
 
+    # Citation-grounded regulatory retrieval (Prompt 21)
+    citation_evidence: Optional[List[Any]] = Field(default_factory=list)
+
     steward_review_guide: str = Field(
         default="Review chronological timeline, minimum proximity frame, and relative braking inputs. "
         "Cross-reference camera angles when available and verify room afforded under FIA Driving Standards Guidelines."
@@ -253,6 +256,23 @@ def synthesize_incident_evidence_dossier(
         decel_delta_g=float(candidate.braking_change.get("decel_delta_g", 0.0)),
     )
 
+    # 5.1 Citation-Grounded Regulatory Retrieval (Prompt 21)
+    citation_evidence = []
+    try:
+        from app.knowledge.service import KnowledgeRetrievalService
+        from app.knowledge.models import RetrievalMethod
+        ksvc = KnowledgeRetrievalService.get_instance()
+        query_text = candidate.event_type.value.replace("_", " ").lower()
+        search_res = ksvc.search_regulations(
+            query=query_text,
+            season=2024,
+            method=RetrievalMethod.HYBRID,
+            limit=3,
+        )
+        citation_evidence = search_res.citations
+    except Exception:
+        citation_evidence = []
+
     # 6. Provenance Tracking
     prov = build_default_provenance(session_id=candidate.session_id)
 
@@ -283,6 +303,7 @@ def synthesize_incident_evidence_dossier(
         baseline_evidence=baseline_evidence,
         overtake_geometry=overtake_geometry,
         ml_evidence=ml_evidence,
+        citation_evidence=citation_evidence,
     )
 
 
@@ -433,6 +454,24 @@ def convert_dossier_to_frontend_incident(
                 verified=True,
             )
         )
+
+    # Citation-Grounded Documentary Evidence Items (Prompt 21)
+    if dossier.citation_evidence:
+        for idx, citation in enumerate(dossier.citation_evidence):
+            chunk = citation.chunk
+            evidence_items.append(
+                EvidenceItemSchema(
+                    id=f"EV-{cand.candidate_id}-CITE-{idx+1}",
+                    category="DOCUMENTARY",
+                    title=f"{chunk.document_id} {chunk.article_number}",
+                    observed_value=f"{chunk.title or 'Standard'} (Relevance: {citation.relevance_score:.2f})",
+                    expected_context="Documentary reference retrieved from canonical regulatory knowledge repository.",
+                    confidence=int(min(1.0, max(0.0, citation.relevance_score)) * 100),
+                    source=f"{chunk.document_id} v{chunk.document_version} (Article {chunk.article_number})",
+                    description=f"{citation.epistemic_notice} Excerpt: {chunk.text[:200]}...",
+                    verified=True,
+                )
+            )
 
     # Map regulations
     frontend_regs = [

@@ -64,21 +64,84 @@ def query_assistant(
         links = [EvidenceLink(label="Open Telemetry Chart", target_view=f"incident-{incident_ref}", incident_id=incident_ref)]
         follow_ups = ["Which regulations may be relevant?", "What evidence is missing?"]
 
-    elif "regulation" in query_lower or "rule" in query_lower:
-        text = (
-            "Relevant regulatory provisions cross-referenced for this interaction geometry:\n\n"
-            "• Article 33.4 (Manoeuvres during Overtaking and Position Defense)\n"
-            "• Article 33.3 (Right to Track Edge and Overlap Thresholds)\n"
-            "• ISC Appendix L, Chapter IV (Overtaking, Car Control and Track Limits)\n\n"
-            "Final interpretation rests solely with the appointed FIA Race Stewards."
+    elif any(k in query_lower for k in ["regulation", "rule", "code", "guideline", "article", "overtaking", "track limits", "penalty"]):
+        import re
+        from app.knowledge.service import KnowledgeRetrievalService
+        from app.knowledge.models import RetrievalMethod
+
+        knowledge_svc = KnowledgeRetrievalService.get_instance()
+        search_res = knowledge_svc.search_regulations(
+            query=payload.query,
+            season=2024,
+            method=RetrievalMethod.HYBRID,
+            limit=3,
         )
-        chips = [
-            EvidenceChip(label="FIA Art 33.4 (Crowding)", type="regulation"),
-            EvidenceChip(label="FIA Art 33.3 (Overlap)", type="regulation"),
-            EvidenceChip(label="ISC App L Ch IV", type="regulation"),
+
+        # Check if the query contains nonsense/unsupported concepts with zero lexical grounding
+        stop_tokens = {"regulation", "regulations", "rule", "rules", "regarding", "what", "which", "the", "in", "of", "and", "is", "a", "for", "to", "apply", "applies"}
+        substantive_tokens = [
+            t for t in re.findall(r"\w+", query_lower)
+            if t not in stop_tokens
         ]
-        links = [EvidenceLink(label="View Relevant Regulations", target_view=f"incident-{incident_ref}", incident_id=incident_ref)]
-        follow_ups = ["Why was this incident flagged?", "What evidence is missing?"]
+        has_substantive_overlap = False
+        if search_res.citations and substantive_tokens:
+            for cit in search_res.citations:
+                c_text = f"{cit.heading} {cit.verbatim_text}".lower()
+                if any(st in c_text for st in substantive_tokens):
+                    has_substantive_overlap = True
+                    break
+
+        if not search_res.citations or (substantive_tokens and not has_substantive_overlap):
+            text = (
+                "INSUFFICIENT_DOCUMENTARY_EVIDENCE: No canonical regulatory provisions or driving standard "
+                f"guidelines in the knowledge base match the query: '{payload.query}'.\n\n"
+                "CRITICAL NON-ADJUDICATIVE NOTICE: The system does not speculate or make unsupported assertions. "
+                "All regulatory review requires grounded documentary citations."
+            )
+            chips = [EvidenceChip(label="Status: INSUFFICIENT_EVIDENCE", type="regulation")]
+            links = []
+        else:
+            lines = [
+                f"Citation-grounded regulatory references for incident {incident_ref}:\n"
+            ]
+            chips = []
+            links = []
+
+            for idx, c in enumerate(search_res.citations, start=1):
+                chunk = c.chunk
+                lines.append(
+                    f"{idx}. [{chunk.document_id}] {chunk.article_number} ({chunk.title or 'Standard'})\n"
+                    f"   \"{chunk.text[:220]}...\"\n"
+                    f"   Relevance: {c.relevance_score:.2f} | Method: {c.retrieval_method.value} | Status: {c.provenance_status.value}\n"
+                )
+                chips.append(
+                    EvidenceChip(
+                        label=f"{chunk.document_id} {chunk.article_number}",
+                        type="regulation",
+                    )
+                )
+                links.append(
+                    EvidenceLink(
+                        label=f"View {chunk.article_number}",
+                        target_view=f"/evidence/documents/{chunk.document_id}",
+                        incident_id=incident_ref,
+                    )
+                )
+
+            if search_res.source_conflicts:
+                lines.append("\nSOURCE_CONFLICT DETECTED:")
+                for conflict in search_res.source_conflicts:
+                    lines.append(
+                        f"• Conflicting texts across [{conflict.document_id_a}] and [{conflict.document_id_b}] "
+                        f"for {conflict.article_number}: {conflict.conflict_description}. "
+                        "Automated resolution is prohibited; deferred to human stewards."
+                    )
+                chips.append(EvidenceChip(label="FLAG: SOURCE_CONFLICT", type="regulation"))
+
+            lines.append(f"\n{search_res.non_adjudication_statement}")
+            text = "\n".join(lines)
+
+        follow_ups = ["Why was this incident flagged?", "What changed in the telemetry?", "What evidence is missing?"]
 
     else:
         text = (

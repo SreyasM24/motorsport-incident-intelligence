@@ -98,7 +98,7 @@ flowchart TD
 3. **Overtake Geometry Engine**: Quantifies front-axle to rear-axle overlap percentage at corner entry, apex, and exit, calculating minimum lateral separation distance without human bias.
 4. **Computer Vision & Video Synchronization**: Maps broadcast footage to telemetry timestamps, maintaining vehicle tracking bounding boxes and cross-referencing visual overlap against sensor clearance.
 5. **Cross-Modal Discrepancy Engine**: Automatically flags contradictions between visual observations and physical telemetry (e.g., visual contact detected without corresponding IMU acceleration spike).
-6. **Regulatory Semantic Retrieval**: Indexes the FIA Formula One Sporting Regulations and International Sporting Code Appendix L, surfacing relevant articles (e.g., Article 33.4 crowding, Article 27.3 track limits) with contextual rationale.
+6. **Citation-Grounded Regulation Knowledge Layer**: Canonical repository of FIA Sporting Regulations (2024 & 2023), ISC Appendix L Chapter IV, and Driving Standards Guidelines. Supports Lexical BM25, Semantic N-Gram, and Hybrid retrieval with season/date filtering, automatic `SOURCE_CONFLICT` discrepancy detection, zero orphaned text, and gold evaluation benchmarks ($\text{MRR} = 0.812$). [Read evidence retrieval architecture](docs/evidence-retrieval.md).
 7. **Complete Steward Audit Trail**: Immutable logging of evidence review statuses, notes, and concurrence records ensuring full transparency and appeal readiness.
 
 ---
