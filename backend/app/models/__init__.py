@@ -9,6 +9,11 @@ from app.models.incident_driver import IncidentDriver
 from app.models.telemetry import Telemetry
 from app.models.regulation import Regulation
 from app.models.review import ReviewRecord
+from app.models.workspace import (
+    DiscrepancyAnnotation,
+    EvidenceAcknowledgement,
+    UnresolvedQuestion,
+)
 
 __all__ = [
     "Base",
@@ -21,4 +26,7 @@ __all__ = [
     "Telemetry",
     "Regulation",
     "ReviewRecord",
+    "EvidenceAcknowledgement",
+    "UnresolvedQuestion",
+    "DiscrepancyAnnotation",
 ]

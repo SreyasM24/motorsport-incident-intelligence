@@ -1135,3 +1135,147 @@ export interface HistoricalComparisonResponse {
   limitations: string[];
 }
 
+// ==============================================================================
+// STEWARD CASE WORKSPACE & EVIDENCE TRIAGE (PROMPT 24)
+// ==============================================================================
+
+export type TriageEpistemicType = 'OBSERVED' | 'DERIVED' | 'MODEL_DERIVED' | 'DOCUMENTARY' | 'UNAVAILABLE';
+export type TriageAvailability = 'FULL' | 'PARTIAL' | 'LIMITED' | 'UNAVAILABLE';
+export type AcknowledgementAction = 'CONSIDERED' | 'NOT_RELEVANT' | 'INSUFFICIENT' | 'CONTRADICTORY' | 'REQUIRES_FOLLOW_UP';
+export type QuestionStatus = 'OPEN' | 'RESOLVED' | 'DEFERRED';
+export type DiscrepancyStatus = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED' | 'UNRESOLVED';
+
+export interface EvidenceAcknowledgement {
+  id: string;
+  candidateId: string;
+  evidenceId: string;
+  reviewerId: string;
+  action: AcknowledgementAction;
+  note?: string | null;
+  createdAt: string;
+}
+
+export interface UnresolvedQuestion {
+  id: string;
+  candidateId: string;
+  question: string;
+  evidenceIds: string[];
+  status: QuestionStatus;
+  reviewerNote?: string | null;
+  createdAt: string;
+  resolvedAt?: string | null;
+}
+
+export interface WorkspaceCaseInfo {
+  candidateId: string;
+  incidentId?: string | null;
+  session: string;
+  event: string;
+  circuit: string;
+  timestamp: string;
+  drivers: string[];
+  incidentStatus: string;
+  reviewStatus: string;
+  analysisVersion: string;
+}
+
+export interface WorkspaceIncidentSummary {
+  incidentType: string;
+  detectionMethod: string;
+  confidence: number;
+  timelineWindow: string;
+  trackPosition?: string | null;
+  lapNumber: number;
+}
+
+export interface WorkspaceEvidenceStreamSummary {
+  availability: TriageAvailability;
+  epistemicType: TriageEpistemicType;
+  quality: string;
+  provenance: string;
+  timestampCoverage: string;
+  limitations: string[];
+  contradictions: string[];
+}
+
+export interface WorkspaceEvidenceItem {
+  evidenceId: string;
+  evidenceType: string;
+  epistemicType: TriageEpistemicType;
+  source: string;
+  availability: TriageAvailability;
+  quality: string;
+  timestamp?: string | null;
+  relevance: string;
+  provenance: string;
+  limitations: string[];
+  discrepancyStatus: string;
+  observation: string;
+  value?: any;
+  unit?: string | null;
+  parentEvidenceIds: string[];
+  triagePriority: number;
+  latestAcknowledgement?: EvidenceAcknowledgement | null;
+}
+
+export interface WorkspaceTimelineEvent {
+  timestamp: string;
+  eventRelativeTimeSec: number;
+  source: string;
+  epistemicType: TriageEpistemicType;
+  description: string;
+  measurement?: string | null;
+  uncertainty?: string | null;
+  provenance: string;
+  evidenceRef?: string | null;
+}
+
+export interface WorkspaceDiscrepancyItem {
+  discrepancyId: string;
+  evidenceA: string;
+  evidenceB: string;
+  discrepancyType: string;
+  magnitude: string;
+  uncertainty: string;
+  explanation: string;
+  severity: string;
+  status: DiscrepancyStatus;
+  affectedEvidenceIds: string[];
+  notes: string[];
+}
+
+export interface ReviewAuditEntry {
+  id: string;
+  status: string;
+  reviewerId: string;
+  timestamp: string;
+  notes?: string | null;
+  rationale?: string | null;
+  evidenceConsidered?: string | null;
+  evidenceMissing?: string | null;
+  observations?: string | null;
+}
+
+export interface WorkspaceReviewSummary {
+  currentState: string;
+  reviewerId?: string | null;
+  reviewerNotes?: string | null;
+  reviewRationale?: string | null;
+  evidenceAcknowledgements: EvidenceAcknowledgement[];
+  unresolvedQuestions: UnresolvedQuestion[];
+  reviewHistory: ReviewAuditEntry[];
+}
+
+export interface StewardCaseWorkspace {
+  case: WorkspaceCaseInfo;
+  incidentSummary: WorkspaceIncidentSummary;
+  evidenceSummary: Record<string, WorkspaceEvidenceStreamSummary>;
+  evidenceItems: WorkspaceEvidenceItem[];
+  timeline: WorkspaceTimelineEvent[];
+  discrepancies: WorkspaceDiscrepancyItem[];
+  historicalComparables?: any;
+  regulations: any[];
+  review: WorkspaceReviewSummary;
+  doctrine: string;
+}
+

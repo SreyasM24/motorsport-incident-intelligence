@@ -11,6 +11,9 @@ import { OvertakeGeometryPanel } from '../components/OvertakeGeometryPanel';
 import { MLEvidencePanel } from '../components/MLEvidencePanel';
 import { StewardDossierPanel } from '../components/StewardDossierPanel';
 import { HistoricalComparablePanel } from '../components/HistoricalComparablePanel';
+import { EvidenceTriagePanel } from '../components/EvidenceTriagePanel';
+import { DiscrepancyInvestigationPanel } from '../components/DiscrepancyInvestigationPanel';
+import { UnresolvedQuestionsPanel } from '../components/UnresolvedQuestionsPanel';
 import { DriverModal } from '../components/DriverModal';
 import { 
   getIncident, 
@@ -21,6 +24,11 @@ import {
   submitIncidentReview,
   fetchStewardDossier,
   fetchHistoricalComparisons,
+  fetchCaseWorkspace,
+  recordEvidenceAcknowledgement,
+  createUnresolvedQuestion,
+  updateUnresolvedQuestion,
+  updateDiscrepancyStatus,
   askAssistant,
 } from '../lib/api';
 import { 
@@ -32,6 +40,10 @@ import {
   IncidentStatus,
   StewardEvidenceDossier,
   HistoricalComparisonResponse,
+  StewardCaseWorkspace,
+  AcknowledgementAction,
+  QuestionStatus,
+  DiscrepancyStatus,
 } from '../lib/types';
 import { 
   ArrowLeft, 
@@ -83,6 +95,7 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
   const [reviewActionError, setReviewActionError] = useState<string | null>(null);
   const [historicalComparisons, setHistoricalComparisons] = useState<HistoricalComparisonResponse | null>(null);
+  const [caseWorkspace, setCaseWorkspace] = useState<StewardCaseWorkspace | null>(null);
 
   // Embedded AI Steward Assistant State
   const [assistantInput, setAssistantInput] = useState('');
@@ -130,6 +143,57 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
       .catch(() => {
         // Fallback
       });
+    fetchCaseWorkspace(incidentId)
+      .then((ws) => {
+        if (ws) setCaseWorkspace(ws);
+      })
+      .catch(() => {
+        // Fallback
+      });
+  };
+
+  const handleRecordAcknowledgement = async (
+    evidenceId: string,
+    action: AcknowledgementAction,
+    note?: string
+  ) => {
+    await recordEvidenceAcknowledgement(incidentId, evidenceId, action, note, reviewerId);
+    fetchCaseWorkspace(incidentId).then((ws) => {
+      if (ws) setCaseWorkspace(ws);
+    });
+  };
+
+  const handleCreateQuestion = async (
+    question: string,
+    evidenceIds?: string[],
+    reviewerNote?: string
+  ) => {
+    await createUnresolvedQuestion(incidentId, question, evidenceIds, reviewerNote);
+    fetchCaseWorkspace(incidentId).then((ws) => {
+      if (ws) setCaseWorkspace(ws);
+    });
+  };
+
+  const handleUpdateQuestion = async (
+    questionId: string,
+    status?: QuestionStatus,
+    reviewerNote?: string
+  ) => {
+    await updateUnresolvedQuestion(incidentId, questionId, status, reviewerNote);
+    fetchCaseWorkspace(incidentId).then((ws) => {
+      if (ws) setCaseWorkspace(ws);
+    });
+  };
+
+  const handleUpdateDiscrepancy = async (
+    discrepancyId: string,
+    status: DiscrepancyStatus,
+    note?: string
+  ) => {
+    await updateDiscrepancyStatus(incidentId, discrepancyId, status, note, reviewerId);
+    fetchCaseWorkspace(incidentId).then((ws) => {
+      if (ws) setCaseWorkspace(ws);
+    });
   };
 
   const handleBeginReview = async () => {
@@ -497,6 +561,38 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
             incidentId={incident.id}
           />
         </section>
+      )}
+
+      {/* ==================================================
+          4G. STEWARD CASE WORKSPACE & EVIDENCE TRIAGE (Prompt 24)
+      ================================================== */}
+      {caseWorkspace && (
+        <>
+          <section className="space-y-3">
+            <EvidenceTriagePanel
+              evidenceItems={caseWorkspace.evidenceItems}
+              candidateId={incident.id}
+              onRecordAcknowledgement={handleRecordAcknowledgement}
+            />
+          </section>
+
+          <section className="space-y-3">
+            <DiscrepancyInvestigationPanel
+              discrepancies={caseWorkspace.discrepancies}
+              candidateId={incident.id}
+              onUpdateStatus={handleUpdateDiscrepancy}
+            />
+          </section>
+
+          <section className="space-y-3">
+            <UnresolvedQuestionsPanel
+              questions={caseWorkspace.review.unresolvedQuestions}
+              candidateId={incident.id}
+              onCreateQuestion={handleCreateQuestion}
+              onUpdateQuestion={handleUpdateQuestion}
+            />
+          </section>
+        </>
       )}
 
       {/* ==================================================

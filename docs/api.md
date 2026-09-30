@@ -471,4 +471,149 @@ Retrieves observably comparable historical cases based on 7 normalized physical 
 }
 ```
 
+---
+
+## 12. Steward Case Workspace Endpoints (Prompt 24)
+
+### 12.1 Retrieve Canonical Case Workspace
+`GET /api/v1/cases/{candidate_id}/workspace`
+
+Returns the master investigation workspace read model aggregating case metadata, incident summary, stream summaries, triage items, chronological timeline with uncertainties, discrepancies, historical comparables, regulations, and review audit trail.
+
+**Response (200 OK):**
+```json
+{
+  "case": {
+    "candidateId": "REF-MONZA-01",
+    "incidentId": "INC-001",
+    "session": "Italian Grand Prix 2024 — Race",
+    "event": "OVERTAKE_APPROACH",
+    "circuit": "Monza",
+    "timestamp": "13:42:18.4",
+    "drivers": ["RIC", "HUL"],
+    "incidentStatus": "REQUIRES_REVIEW",
+    "reviewStatus": "REQUIRES_REVIEW",
+    "analysisVersion": "v1.0"
+  },
+  "incidentSummary": {
+    "incidentType": "OVERTAKE_APPROACH",
+    "detectionMethod": "KINEMATIC_RELATIVE_MOTION_ANOMALY",
+    "confidence": 85,
+    "timelineWindow": "T-2.0s → T+1.5s relative to 13:42:18.4",
+    "trackPosition": "Variante del Rettifilo (Turn 1/2)",
+    "lapNumber": 1
+  },
+  "evidenceSummary": {
+    "telemetry": {
+      "availability": "FULL",
+      "epistemicType": "OBSERVED",
+      "quality": "High-Fidelity 25Hz Resampled CAN Grid",
+      "provenance": "Official FastF1 / OpenF1 Synchronized Timing Feed",
+      "timestampCoverage": "T-2.0s → T+1.5s",
+      "limitations": ["Interpolated at 25Hz from irregular asynchronous ECU broadcasts"],
+      "contradictions": []
+    },
+    "video": {
+      "availability": "UNAVAILABLE",
+      "epistemicType": "OBSERVED",
+      "quality": "UNAVAILABLE (FOM Copyright)",
+      "provenance": "Unlinked Broadcast Stream",
+      "timestampCoverage": "0.0s",
+      "limitations": [
+        "Commercial broadcast footage is legally protected under copyright and cannot be redistributed.",
+        "Unlinked video frames are recorded as unobserved data, never as negative evidence or proof of guilt."
+      ],
+      "contradictions": []
+    }
+  },
+  "evidenceItems": [
+    {
+      "evidenceId": "EV-REF-MONZA-01-TEL-RAW",
+      "evidenceType": "TELEMETRY",
+      "epistemicType": "OBSERVED",
+      "source": "FastF1 / OpenF1 25Hz Resampled SI Grid",
+      "availability": "FULL",
+      "quality": "Quality Score 85/100",
+      "timestamp": "13:42:18.4",
+      "relevance": "Relevant to telemetry",
+      "provenance": "FastF1 Official Timing & Telemetry Feed",
+      "limitations": ["Interpolated at 25Hz from irregular asynchronous ECU broadcasts"],
+      "discrepancyStatus": "NONE",
+      "observation": "Raw 25Hz Cartesian Coordinates and ECU Sensor Channels",
+      "parentEvidenceIds": [],
+      "triagePriority": 1,
+      "latestAcknowledgement": null
+    }
+  ],
+  "timeline": [
+    {
+      "timestamp": "13:42:16.4",
+      "eventRelativeTimeSec": -2.0,
+      "source": "FastF1 Telemetry",
+      "epistemicType": "OBSERVED",
+      "description": "Initial Approach Established",
+      "measurement": "Velocity 332.4 km/h",
+      "uncertainty": "± 2.0 km/h (ECU CAN bus sample accuracy)",
+      "provenance": "FastF1 Telemetry Log"
+    }
+  ],
+  "discrepancies": [
+    {
+      "discrepancyId": "DISC-TEL-VID-01",
+      "evidenceA": "FastF1 Telemetry",
+      "evidenceB": "Broadcast Video",
+      "discrepancyType": "Timestamp Calibration Offset",
+      "magnitude": "0.28 s",
+      "uncertainty": "± 0.04 s",
+      "explanation": "Telemetry peak deceleration precedes visual contact point by 7 video frames.",
+      "severity": "LOW",
+      "status": "OPEN",
+      "affectedEvidenceIds": ["EV-TEL-RAW"],
+      "notes": []
+    }
+  ],
+  "doctrine": "CRITICAL STEWARD DOCTRINE: This workspace organizes empirical, kinematic, and documentary evidence to assist human race stewards. It strictly DOES NOT automate driver guilt, assign fault probabilities, issue penalties, or make legal adjudications. Human stewards retain exclusive decision authority."
+}
+```
+
+### 12.2 Record Reviewer Evidence Acknowledgement
+`POST /api/v1/cases/{candidate_id}/evidence/{evidence_id}/review`
+
+**Request Body:**
+```json
+{
+  "reviewerId": "steward-1",
+  "action": "CONSIDERED",
+  "note": "Verified ECU brake trace against baseline."
+}
+```
+
+### 12.3 Open / Update Unresolved Investigation Question
+`POST /api/v1/cases/{candidate_id}/questions`
+```json
+{
+  "question": "Camera coverage does not establish rear-wheel overlap at apex.",
+  "evidenceIds": ["EV-TEL-RAW", "EV-CV-TRACK-01"],
+  "reviewerNote": "Request secondary trackside camera timecode alignment."
+}
+```
+
+`PATCH /api/v1/cases/{candidate_id}/questions/{question_id}`
+```json
+{
+  "status": "RESOLVED",
+  "reviewerNote": "Lateral telemetry displacement confirms 60% overlap maintained throughout apex phase."
+}
+```
+
+### 12.4 Update Discrepancy Status
+`POST /api/v1/cases/{candidate_id}/discrepancies/{discrepancy_id}/status`
+```json
+{
+  "status": "ACKNOWLEDGED",
+  "reviewerId": "steward-panel",
+  "note": "Acknowledged 0.28s temporal offset; telemetry prioritized for velocity profile."
+}
+```
+
 

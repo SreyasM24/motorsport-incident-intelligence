@@ -189,6 +189,30 @@ Evaluated across all 30 verified cases in the Historical Incident Reconstruction
 4. **Observable Explainability Grounding**: Every retrieved match includes dynamically generated `matched_features` and `unmatched_features` detailing delta braking, spatial gaps, and corner geometries.
 5. **Physical Measurement Uncertainty**: Every physical metric in side-by-side comparisons includes calibrated uncertainty bounds ($\pm 0.2\text{ m}$, $\pm 1.0\text{ m}$, $\pm 5\text{ km/h}$).
 
+---
+
+## 9. Steward Case Workspace Evaluation (Prompt 24)
+
+For detailed architectural specifications, see:
+- [**Steward Case Workspace Guide**](steward-case-workspace.md)
+
+### Quantitative Latency & Performance
+
+Evaluated against authoritative Monza reference cases (`REF-MONZA-01`, `REF-MONZA-02`, `REF-MONZA-03`):
+
+| Incident Reference | Cold Ingestion & Synthesis | Warm Workspace Latency | Target Threshold | Status |
+| :--- | :---: | :---: | :---: | :---: |
+| **REF-MONZA-01 (RIC-HUL Lap 1)** | $33.84\text{ s}$ | **$0.22\text{ ms}$** | $< 500\text{ ms}$ | **PASSED** |
+| **REF-MONZA-02 (HUL-TSU Lap 4)** | $5.98\text{ s}$ | **$0.22\text{ ms}$** | $< 500\text{ ms}$ | **PASSED** |
+| **REF-MONZA-03 (MAG-GAS Lap 19)** | $18.80\text{ s}$ | **$0.12\text{ ms}$** | $< 500\text{ ms}$ | **PASSED** |
+
+### Verified Workspace Guardrails
+1. **Deterministic Epistemic Triage**: Evaluated across all 18 test suite checks; evidence items are strictly ordered $1 \longrightarrow 5$ without altering adjudication data.
+2. **Reviewer Acknowledgement Non-Mutation**: Recording steward triage metadata (`CONSIDERED`, `INSUFFICIENT`, etc.) creates independent audit records without modifying source telemetry.
+3. **Unresolved Question Lifecycle**: Stewards can log factual gaps (`OPEN`), track related evidence IDs, and resolve with explicit findings (`RESOLVED`).
+4. **Discrepancy Visibility**: Cross-modal contradictions remain prominently flagged for human inspection and are never algorithmically smoothed over.
+5. **AI Non-Adjudication Refusal**: Assistant queries demanding fault assignments or penalty recommendations are unequivocally rejected with non-adjudication notices.
+
 
 
 

@@ -12,7 +12,15 @@ import {
   IncidentVisualEvidenceSufficiency,
   StewardEvidenceDossier,
   DossierExportPayload,
-  HistoricalComparisonResponse
+  HistoricalComparisonResponse,
+  StewardCaseWorkspace,
+  EvidenceAcknowledgement,
+  AcknowledgementAction,
+  UnresolvedQuestion,
+  QuestionStatus,
+  DiscrepancyStatus,
+  WorkspaceTimelineEvent,
+  ReviewAuditEntry
 } from './types';
 import { 
   MOCK_RACES, 
@@ -578,6 +586,160 @@ export async function fetchHistoricalComparisons(
     }
   }
   return null;
+}
+
+// ==============================================================================
+// STEWARD CASE WORKSPACE API CLIENT (PROMPT 24)
+// ==============================================================================
+
+export async function fetchCaseWorkspace(
+  candidateId: string,
+  forceRefresh: boolean = false
+): Promise<StewardCaseWorkspace | null> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/workspace?force_refresh=${forceRefresh}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Live case workspace for ${candidateId} unreachable:`, e);
+    }
+  }
+  return null;
+}
+
+export async function recordEvidenceAcknowledgement(
+  candidateId: string,
+  evidenceId: string,
+  action: AcknowledgementAction,
+  note?: string,
+  reviewerId: string = 'steward-panel'
+): Promise<EvidenceAcknowledgement | null> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/evidence/${encodeURIComponent(evidenceId)}/review`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewerId, action, note }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Record acknowledgement failed for ${evidenceId}:`, e);
+    }
+  }
+  return null;
+}
+
+export async function createUnresolvedQuestion(
+  candidateId: string,
+  question: string,
+  evidenceIds: string[] = [],
+  reviewerNote?: string
+): Promise<UnresolvedQuestion | null> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/questions`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, evidenceIds, reviewerNote }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Create unresolved question failed:`, e);
+    }
+  }
+  return null;
+}
+
+export async function updateUnresolvedQuestion(
+  candidateId: string,
+  questionId: string,
+  status?: QuestionStatus,
+  reviewerNote?: string
+): Promise<UnresolvedQuestion | null> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/questions/${encodeURIComponent(questionId)}`;
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, reviewerNote }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Update unresolved question failed for ${questionId}:`, e);
+    }
+  }
+  return null;
+}
+
+export async function updateDiscrepancyStatus(
+  candidateId: string,
+  discrepancyId: string,
+  status: DiscrepancyStatus,
+  note?: string,
+  reviewerId: string = 'steward-panel'
+): Promise<any> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/discrepancies/${encodeURIComponent(discrepancyId)}/status`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, reviewerId, note }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Update discrepancy status failed for ${discrepancyId}:`, e);
+    }
+  }
+  return null;
+}
+
+export async function fetchCaseTimeline(
+  candidateId: string
+): Promise<WorkspaceTimelineEvent[]> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/timeline`;
+      const res = await fetch(url);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Fetch timeline failed for ${candidateId}:`, e);
+    }
+  }
+  return [];
+}
+
+export async function fetchCaseAuditTrail(
+  candidateId: string
+): Promise<ReviewAuditEntry[]> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      const url = `${API_BASE_URL}/cases/${encodeURIComponent(candidateId)}/audit`;
+      const res = await fetch(url);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Fetch audit trail failed for ${candidateId}:`, e);
+    }
+  }
+  return [];
 }
 
 

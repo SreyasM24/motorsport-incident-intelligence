@@ -32,7 +32,104 @@ def query_assistant(
     query_lower = payload.query.lower()
     incident_ref = payload.incident_id or "INC-024"
 
-    if "why was" in query_lower or "flagged" in query_lower:
+    # Mandatory Refusal of Guilt / Fault / Penalty Determination
+    if (
+        any(k in query_lower for k in [
+            "at fault", "is guilty", "'s guilty", "who caused", "penalized", "penalty recommend",
+            "fault split", "fault probability", "guilty driver", "decide penalty", "assign blame",
+            "who should get a penalty", "give a penalty", "deserves a penalty", "deserve a penalty"
+        ])
+        or ("penalty" in query_lower and any(w in query_lower for w in ["recommend", "should", "who", "suggest", "deserve", "impose", "decide"]))
+    ):
+        text = (
+            "NON-ADJUDICATION GUARDRAIL REFUSAL:\n\n"
+            "The Motorsport Incident Intelligence system strictly does NOT determine guilt, assign fault, "
+            "calculate liability probabilities, or recommend sporting penalties.\n\n"
+            "All findings of infringement, sporting responsibility, and penalty imposition remain the "
+            "exclusive statutory responsibility of the human FIA steward panel under the International Sporting Code."
+        )
+        chips = [
+            EvidenceChip(label="DOCTRINE: NON_ADJUDICATIVE", type="regulation"),
+            EvidenceChip(label="AUTHORITY: FIA_STEWARDS_ONLY", type="status"),
+        ]
+        links = [EvidenceLink(label=f"Review Case Workspace", target_view=f"/cases/{incident_ref}/workspace", incident_id=incident_ref)]
+        return AssistantMessageSchema(
+            id=msg_id,
+            sender="assistant",
+            timestamp=timestamp_str,
+            text=text,
+            evidence_chips=chips,
+            evidence_links=links,
+            suggested_follow_ups=["What evidence is currently available?", "What contradictions remain?", "Which regulations may be relevant?"],
+        )
+
+    if ("available" in query_lower and "evidence" in query_lower) or query_lower.startswith("what evidence is currently available"):
+        from app.services.workspace_service import StewardWorkspaceService
+        try:
+            ws = StewardWorkspaceService.get_workspace(incident_ref, db=db)
+            avail_streams = [k for k, v in ws.evidence_summary.items() if v.availability.value in ("FULL", "PARTIAL")]
+            unavail_streams = [k for k, v in ws.evidence_summary.items() if v.availability.value == "UNAVAILABLE"]
+
+            lines = [
+                f"EVIDENTIARY AUDIT FOR CASE {incident_ref}:\n",
+                f"• AVAILABLE EVIDENCE STREAMS ({len(avail_streams)}): {', '.join(avail_streams).upper()}",
+                f"• UNAVAILABLE STREAMS ({len(unavail_streams)}): {', '.join(unavail_streams).upper() if unavail_streams else 'NONE'}",
+                f"• INDEPENDENT TRIAGE ITEMS: {len(ws.evidence_items)} item(s) categorized across 5 epistemic levels.",
+                f"• ACTIVE DISCREPANCIES: {len(ws.discrepancies)} contradiction(s) flagged for steward review.",
+                "\nPROVENANCE SUMMARY:\nTelemetry grounded in official FastF1 ECU CAN-bus stream. Commercial broadcast video unbundled per FOM copyright protections.",
+            ]
+            text = "\n".join(lines)
+            chips = [
+                EvidenceChip(label=f"Available: {len(avail_streams)}", type="telemetry"),
+                EvidenceChip(label=f"Unavailable: {len(unavail_streams)}", type="status"),
+                EvidenceChip(label=f"Triage Items: {len(ws.evidence_items)}", type="evidence"),
+            ]
+            links = [EvidenceLink(label=f"Open Case Workspace", target_view=f"/cases/{incident_ref}/workspace", incident_id=incident_ref)]
+            follow_ups = ["What contradictions remain?", "Which regulations may be relevant?", "What changed in the telemetry?"]
+        except Exception:
+            text = (
+                f"Evidence completeness for candidate {incident_ref}:\n\n"
+                "• Available: Telemetry (25Hz CAN-bus), Reference Baseline, Overtake Geometry, FIA Regulations, Historical Benchmark.\n"
+                "• Unavailable: Live broadcast video frames (protected under FOM commercial copyright).\n"
+                "• Limitations: GPS Cartesian interpolation bounded by ±0.20m."
+            )
+            chips = [EvidenceChip(label="Telemetry: COMPLETE", type="telemetry")]
+            links = []
+            follow_ups = ["What changed in the telemetry?", "Which regulations may be relevant?"]
+
+    elif any(k in query_lower for k in ["contradiction", "discrepanc", "conflict"]):
+        from app.services.workspace_service import StewardWorkspaceService
+        try:
+            ws = StewardWorkspaceService.get_workspace(incident_ref, db=db)
+            if not ws.discrepancies:
+                text = (
+                    f"DISCREPANCY AUDIT FOR CASE {incident_ref}:\n\n"
+                    "Zero active cross-modal contradictions detected between telemetry, baseline, and official documents."
+                )
+                chips = [EvidenceChip(label="Discrepancies: 0", type="status")]
+            else:
+                lines = [
+                    f"ACTIVE DISCREPANCIES FOR CASE {incident_ref} ({len(ws.discrepancies)}):\n"
+                ]
+                for idx, d in enumerate(ws.discrepancies, start=1):
+                    lines.append(
+                        f"{idx}. [{d.discrepancy_id}] {d.evidence_a} vs {d.evidence_b} ({d.severity})\n"
+                        f"   Discrepancy: {d.discrepancy_type} | Magnitude: {d.magnitude} (Uncertainty: {d.uncertainty})\n"
+                        f"   Status: {d.status.value}\n"
+                        f"   Explanation: {d.explanation}\n"
+                    )
+                lines.append("CRITICAL NOTICE: Contradictions are surfaced for steward evaluation and are never automatically reconciled.")
+                text = "\n".join(lines)
+                chips = [EvidenceChip(label=f"Discrepancies: {len(ws.discrepancies)}", type="evidence")]
+            links = [EvidenceLink(label=f"Inspect Discrepancies", target_view=f"/cases/{incident_ref}/workspace", incident_id=incident_ref)]
+            follow_ups = ["What evidence is currently available?", "Which regulations may be relevant?"]
+        except Exception as e:
+            text = f"Unable to retrieve discrepancies for {incident_ref}: {str(e)}"
+            chips = []
+            links = []
+            follow_ups = []
+
+    elif "why was" in query_lower or "flagged" in query_lower:
         text = (
             f"Candidate {incident_ref} was flagged based on multi-channel telemetry anomaly detection:\n\n"
             "• PROXIMITY: Interacting vehicles entered close proximity with rapid spatial convergence.\n"
