@@ -565,7 +565,33 @@ class StewardDossierSynthesizer:
             reviewer_id = review_record.get("reviewer_id")
             review_notes = review_record.get("review_notes")
 
-        # 7. Assemble Master Steward Evidence Dossier
+        # 7. Historical Comparable Retrieval (Prompt 23)
+        historical_comparable = None
+        try:
+            from app.benchmark.comparator import HistoricalCaseComparator
+            comparator = HistoricalCaseComparator()
+            min_gap = None
+            if hasattr(dossier, "overtake_evidence") and dossier.overtake_evidence:
+                min_gap = getattr(dossier.overtake_evidence, "minimum_lateral_distance_m", None)
+
+            cand_event_val = cand.event_type.value if hasattr(cand.event_type, "value") else str(cand.event_type)
+            query_features = {
+                "category": cand_event_val or "FORCING_OFF_TRACK",
+                "corner": cand.turn or "Turn 4",
+                "primary_turn": cand.turn or "Turn 4",
+                "gap_meters": float(min_gap) if min_gap is not None else 1.5,
+                "delta_brake": 10.0,
+                "speed_kph": 180.0,
+            }
+            historical_comparable = comparator.compare_case(
+                query_case_id=cid,
+                query_features=query_features,
+                top_k=3,
+            )
+        except Exception:
+            historical_comparable = None
+
+        # 8. Assemble Master Steward Evidence Dossier
         return StewardEvidenceDossier(
             dossier_id=f"STEWARD-DOSSIER-{cid}",
             candidate_id=cid,
@@ -593,6 +619,7 @@ class StewardDossierSynthesizer:
             consensus=consensus,
             discrepancies=discrepancies,
             regulations=descriptive_regs,
+            historical_comparable_evidence=historical_comparable,
             limitations=limitations,
             provenance_summary=(
                 f"Synthesized from {len(evidence_items)} canonical evidence items across 8 streams. "

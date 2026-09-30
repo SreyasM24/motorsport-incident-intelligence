@@ -13,6 +13,7 @@ from app.knowledge.models import (
 )
 from app.knowledge.benchmark import RetrievalBenchmarkReport
 from app.knowledge.service import KnowledgeRetrievalService, get_knowledge_service
+from app.benchmark.comparator import HistoricalComparisonResponse
 
 router = APIRouter(prefix="/evidence", tags=["Evidence & Knowledge Retrieval"])
 
@@ -65,6 +66,29 @@ def search_historical_incidents(
         circuit=circuit,
         category=category,
         top_k=top_k,
+    )
+
+
+@router.get(
+    "/historical/compare/{candidate_id}",
+    response_model=HistoricalComparisonResponse,
+    summary="Explainable historical case comparison with observable kinematics and side-by-side analysis",
+)
+def compare_historical_case(
+    candidate_id: str,
+    top_k: int = Query(default=3, ge=1, le=10, description="Maximum number of comparable cases to return"),
+    circuit: Optional[str] = Query(default=None, description="Optional circuit filter"),
+    season: Optional[int] = Query(default=None, description="Optional season filter"),
+    min_similarity: float = Query(default=0.0, ge=0.0, le=1.0, description="Minimum observable similarity threshold"),
+    service: KnowledgeRetrievalService = Depends(get_knowledge_service),
+) -> HistoricalComparisonResponse:
+    """Retrieve explainable historical comparators grounded in observable kinematics with side-by-side metrics."""
+    return service.compare_case(
+        candidate_id=candidate_id,
+        top_k=top_k,
+        circuit=circuit,
+        season=season,
+        min_similarity=min_similarity,
     )
 
 

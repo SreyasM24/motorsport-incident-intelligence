@@ -99,7 +99,8 @@ flowchart TD
 4. **Computer Vision & Video Synchronization**: Maps broadcast footage to telemetry timestamps, maintaining vehicle tracking bounding boxes and cross-referencing visual overlap against sensor clearance.
 5. **Cross-Modal Discrepancy Engine**: Automatically flags contradictions between visual observations and physical telemetry (e.g., visual contact detected without corresponding IMU acceleration spike).
 6. **Citation-Grounded Regulation Knowledge Layer**: Canonical repository of FIA Sporting Regulations (2024 & 2023), ISC Appendix L Chapter IV, and Driving Standards Guidelines. Supports Lexical BM25, Semantic N-Gram, and Hybrid retrieval with season/date filtering, automatic `SOURCE_CONFLICT` discrepancy detection, zero orphaned text, and gold evaluation benchmarks ($\text{MRR} = 0.812$). [Read evidence retrieval architecture](docs/evidence-retrieval.md).
-7. **Complete Steward Audit Trail**: Immutable logging of evidence review statuses, notes, and concurrence records ensuring full transparency and appeal readiness.
+7. **Explainable Historical Comparable-Case Intelligence & Side-by-Side Analysis**: Compares candidate incidents against 30 verified historical benchmark cases across 7 normalized physical dimensions with dynamic explainability (`matched_features`, `unmatched_features`), objective relevance grading (`HIGHLY_COMPARABLE`, `PARTIALLY_COMPARABLE`, `NOT_COMPARABLE`), missing-data weight renormalization, side-by-side metric comparisons with explicit sensor uncertainty bounds ($\pm 0.2\text{ m}$, $\pm 1.0\text{ m}$, $\pm 5\text{ km/h}$), and strict precedent isolation ($\text{MRR} = 0.865$). [Read historical comparison architecture](docs/historical-comparable-cases.md).
+8. **Complete Steward Audit Trail**: Immutable logging of evidence review statuses, notes, and concurrence records ensuring full transparency and appeal readiness.
 
 ---
 

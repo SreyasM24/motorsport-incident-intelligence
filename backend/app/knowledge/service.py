@@ -15,6 +15,7 @@ from app.knowledge.models import (
     RegulationSearchResult,
     RetrievalMethod,
 )
+from app.benchmark.comparator import HistoricalComparisonResponse
 from app.knowledge.repository import DocumentRepository
 from app.knowledge.retriever import KnowledgeRetrievalEngine
 from app.knowledge.historical_retriever import HistoricalIncidentKnowledgeRetriever
@@ -84,6 +85,23 @@ class KnowledgeRetrievalService:
         return self.historical_retriever.retrieve_by_case_id(
             case_id=case_id,
             top_k=top_k,
+        )
+
+    def compare_case(
+        self,
+        candidate_id: str,
+        top_k: int = 3,
+        circuit: Optional[str] = None,
+        season: Optional[int] = None,
+        min_similarity: float = 0.0,
+    ) -> HistoricalComparisonResponse:
+        """Compare candidate against historical benchmark cases with observable kinematics."""
+        return self.historical_retriever.compare_case(
+            candidate_id=candidate_id,
+            top_k=top_k,
+            circuit=circuit,
+            season=season,
+            min_similarity=min_similarity,
         )
 
     def list_documents(

@@ -25,8 +25,16 @@ from app.benchmark.evaluator import (
 )
 from app.benchmark.comparator import (
     ComparableIncidentMatch,
+    ComparableIncidentResult,
+    ComparableOfficialSource,
     ComparatorEvaluationReport,
+    DataQualityRating,
+    DimensionAvailability,
     HistoricalCaseComparator,
+    HistoricalComparisonResponse,
+    RelevanceGrade,
+    SideBySideComparison,
+    SideBySideMetricRow,
 )
 from app.benchmark.service import (
     BenchmarkService,
@@ -54,8 +62,16 @@ __all__ = [
     "MetricIndependenceCategory",
     "MetricProvenanceAudit",
     "ComparableIncidentMatch",
+    "ComparableIncidentResult",
+    "ComparableOfficialSource",
     "ComparatorEvaluationReport",
+    "DataQualityRating",
+    "DimensionAvailability",
     "HistoricalCaseComparator",
+    "HistoricalComparisonResponse",
+    "RelevanceGrade",
+    "SideBySideComparison",
+    "SideBySideMetricRow",
     "BenchmarkService",
     "get_benchmark_service",
 ]

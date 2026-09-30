@@ -10,6 +10,7 @@ import { ReferenceBaselinePanel } from '../components/ReferenceBaselinePanel';
 import { OvertakeGeometryPanel } from '../components/OvertakeGeometryPanel';
 import { MLEvidencePanel } from '../components/MLEvidencePanel';
 import { StewardDossierPanel } from '../components/StewardDossierPanel';
+import { HistoricalComparablePanel } from '../components/HistoricalComparablePanel';
 import { DriverModal } from '../components/DriverModal';
 import { 
   getIncident, 
@@ -19,6 +20,7 @@ import {
   getIncidentReviews,
   submitIncidentReview,
   fetchStewardDossier,
+  fetchHistoricalComparisons,
   askAssistant,
 } from '../lib/api';
 import { 
@@ -29,6 +31,7 @@ import {
   ReviewRecord,
   IncidentStatus,
   StewardEvidenceDossier,
+  HistoricalComparisonResponse,
 } from '../lib/types';
 import { 
   ArrowLeft, 
@@ -79,6 +82,7 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
   const [evidenceMissing, setEvidenceMissing] = useState<string[]>([]);
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
   const [reviewActionError, setReviewActionError] = useState<string | null>(null);
+  const [historicalComparisons, setHistoricalComparisons] = useState<HistoricalComparisonResponse | null>(null);
 
   // Embedded AI Steward Assistant State
   const [assistantInput, setAssistantInput] = useState('');
@@ -120,6 +124,11 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
       .then(setStewardDossier)
       .catch(() => {
         // Fallback or unlinked
+      });
+    fetchHistoricalComparisons(incidentId)
+      .then(setHistoricalComparisons)
+      .catch(() => {
+        // Fallback
       });
   };
 
@@ -475,6 +484,18 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
       {stewardDossier && (
         <section className="space-y-3">
           <StewardDossierPanel dossier={stewardDossier} />
+        </section>
+      )}
+
+      {/* ==================================================
+          4F. EXPLAINABLE HISTORICAL COMPARABLE CASES & SIDE-BY-SIDE ANALYSIS (Prompt 23)
+      ================================================== */}
+      {(stewardDossier?.historicalComparableEvidence || historicalComparisons) && (
+        <section className="space-y-3">
+          <HistoricalComparablePanel
+            comparisonData={stewardDossier?.historicalComparableEvidence || historicalComparisons}
+            incidentId={incident.id}
+          />
         </section>
       )}
 

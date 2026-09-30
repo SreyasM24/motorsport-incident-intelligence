@@ -1058,6 +1058,7 @@ export interface StewardEvidenceDossier {
   consensus: EvidenceConsensus;
   discrepancies: CrossModalDiscrepancy[];
   regulations: DescriptiveRegulationLink[];
+  historicalComparableEvidence?: HistoricalComparisonResponse;
   limitations: string[];
   provenanceSummary: string;
   stewardDoctrine: string;
@@ -1068,5 +1069,69 @@ export interface DossierExportPayload {
   schemaVersion: string;
   exportedAt: string;
   dossier: StewardEvidenceDossier;
+}
+
+export type RelevanceGrade = 'HIGHLY_COMPARABLE' | 'PARTIALLY_COMPARABLE' | 'NOT_COMPARABLE';
+export type DataQualityRating = 'FULL' | 'PARTIAL' | 'LIMITED';
+export type DimensionAvailability = 'AVAILABLE' | 'MISSING' | 'NOT_APPLICABLE';
+
+export interface SideBySideMetricRow {
+  metric: string;
+  currentValue: string;
+  historicalValue: string;
+  difference: string;
+  uncertainty: string;
+  sourceType: string;
+  status: string;
+}
+
+export interface SideBySideComparison {
+  currentCaseId: string;
+  historicalCaseId: string;
+  metrics: SideBySideMetricRow[];
+}
+
+export interface ComparableOfficialSource {
+  documentTitle: string;
+  documentIdentifier: string;
+  canonicalUrl?: string;
+  decisionType: string;
+  decisionSummary: string;
+  epistemicNotice: string;
+}
+
+export interface ComparableIncidentResult {
+  caseId: string;
+  series: string;
+  season: number;
+  event: string;
+  circuit: string;
+  corner: string;
+  session: string;
+  drivers: string[];
+  observableSimilarityScore: number;
+  similarityRank: number;
+  relevanceGrade: RelevanceGrade;
+  similarityDimensions: Record<string, string>;
+  dimensionScores: Record<string, number>;
+  matchedFeatures: string[];
+  unmatchedFeatures: string[];
+  dataQuality: DataQualityRating;
+  evidenceAvailability: Record<string, string>;
+  documentaryContext?: any;
+  officialSources: ComparableOfficialSource[];
+  sourceConflict?: string;
+  limitations: string[];
+  sideBySide?: SideBySideComparison;
+  epistemicWarning?: string;
+}
+
+export interface HistoricalComparisonResponse {
+  queryCaseId: string;
+  comparatorVersion: string;
+  totalCasesEvaluated: number;
+  comparableCases: ComparableIncidentResult[];
+  nonAdjudicationStatement: string;
+  limitations: string[];
 }
 

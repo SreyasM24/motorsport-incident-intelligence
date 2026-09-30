@@ -380,3 +380,95 @@ Evaluates whether visual evidence is sufficient for human steward review (`SUFFI
 - For commercial cases with unlinked video, returns `steward_readiness: "UNAVAILABLE"` and `VIDEO_EVIDENCE_UNAVAILABLE`.
 - Emphasizes that absence of video is unobserved data, never negative evidence or driver guilt.
 
+---
+
+## 11. Explainable Historical Case Intelligence & Side-by-Side Analysis
+
+### `GET /api/v1/evidence/historical/compare/{candidate_id}`
+Retrieves observably comparable historical cases based on 7 normalized physical dimensions (corner phase, spatial separation, braking onset, speed relationship, trajectory, apex overlap, exit clearance) with dynamic explainability and side-by-side metric comparison.
+
+**Parameters**:
+- `candidate_id` (path, required): Candidate incident ID or benchmark case ID (e.g. `HIST-2024-ITA-R-01`).
+- `top_k` (query, optional, default `3`, max `10`): Maximum number of comparable records.
+- `circuit` (query, optional): Filter by circuit name (e.g., `Monza`, `Spielberg`).
+- `season` (query, optional): Filter by championship season (e.g., `2024`, `2021`).
+- `min_similarity` (query, optional, default `0.0`, range `[0.0, 1.0]`): Minimum observable similarity threshold.
+
+**Response `200 OK`**:
+```json
+{
+  "queryCaseId": "HIST-2024-ITA-R-01",
+  "comparatorVersion": "historical_comparator_v2",
+  "totalCasesEvaluated": 30,
+  "comparableCases": [
+    {
+      "caseId": "HIST-2021-ITA-R-01",
+      "series": "Formula 1",
+      "season": 2021,
+      "event": "Italian Grand Prix",
+      "circuit": "Autodromo Nazionale Monza",
+      "corner": "Variante del Rettifilo (Turn 1/2)",
+      "session": "Race",
+      "drivers": ["VER", "HAM"],
+      "observableSimilarityScore": 0.825,
+      "similarityRank": 1,
+      "relevanceGrade": "HIGHLY_COMPARABLE",
+      "matchedFeatures": [
+        "Late braking onset within 1.5 m of historical case (+10.0 m vs baseline)",
+        "Close lateral apex proximity within 0.2 m"
+      ],
+      "unmatchedFeatures": [
+        "Slightly tighter exit clearance (+0.4 m difference)"
+      ],
+      "dataQuality": "FULL",
+      "evidenceAvailability": {
+        "telemetry": "AVAILABLE",
+        "video": "AVAILABLE",
+        "regulation": "AVAILABLE"
+      },
+      "officialSources": [
+        {
+          "documentId": "DOC-64",
+          "officialDocument": "FIA Stewards Decision — Document 64",
+          "sourceUrl": "https://www.fia.com/documents/doc-64",
+          "articleNumber": "Article 33.3",
+          "documentVersion": "2021 Official Issue",
+          "epistemicType": "DOCUMENTARY",
+          "provenanceStatus": "CANONICAL_DOCUMENTED"
+        }
+      ],
+      "sideBySide": {
+        "currentCaseId": "HIST-2024-ITA-R-01",
+        "historicalCaseId": "HIST-2021-ITA-R-01",
+        "metrics": [
+          {
+            "metric": "Interaction Category",
+            "currentValue": "FORCING OFF TRACK",
+            "historicalValue": "FORCING OFF TRACK",
+            "difference": "Identical",
+            "uncertainty": "± 0.0 cat",
+            "sourceType": "DERIVED",
+            "status": "AVAILABLE"
+          },
+          {
+            "metric": "Minimum Lateral Gap",
+            "currentValue": "1.5 m ± 0.2 m",
+            "historicalValue": "1.4 m ± 0.2 m",
+            "difference": "+0.10 m (Wider)",
+            "uncertainty": "± 0.2 m",
+            "sourceType": "OBSERVED",
+            "status": "AVAILABLE"
+          }
+        ]
+      }
+    }
+  ],
+  "nonAdjudicationStatement": "CRITICAL NON-ADJUDICATIVE NOTICE: Historical incident retrieval is based exclusively on observable physical and track geometry features. Historical outcomes do NOT determine current driver guilt, fault, or sporting penalties.",
+  "limitations": [
+    "Past steward decisions are documentary records and do not constitute binding precedent.",
+    "Similarity is derived strictly from observable track geometry, gap, and braking deltas."
+  ]
+}
+```
+
+

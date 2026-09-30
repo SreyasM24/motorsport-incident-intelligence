@@ -239,6 +239,9 @@ class StewardEvidenceDossier(BaseModel):
     # Descriptive Regulations
     regulations: List[DescriptiveRegulationLink] = Field(default_factory=list)
 
+    # Historical Comparable Evidence (Prompt 23 Explainable Retrieval)
+    historical_comparable_evidence: Optional[Any] = None
+
     # General Limitations & Provenance
     limitations: List[str] = Field(default_factory=list)
     provenance_summary: str

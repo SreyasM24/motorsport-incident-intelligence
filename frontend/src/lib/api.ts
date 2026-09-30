@@ -11,7 +11,8 @@ import {
   CVEvaluationSuiteResponse,
   IncidentVisualEvidenceSufficiency,
   StewardEvidenceDossier,
-  DossierExportPayload
+  DossierExportPayload,
+  HistoricalComparisonResponse
 } from './types';
 import { 
   MOCK_RACES, 
@@ -551,6 +552,29 @@ export async function exportStewardDossierJson(candidateId: string): Promise<Dos
       }
     } catch (e) {
       console.warn(`Live steward dossier JSON export for ${candidateId} unreachable:`, e);
+    }
+  }
+  return null;
+}
+
+export async function fetchHistoricalComparisons(
+  candidateId: string,
+  topK: number = 3,
+  circuit?: string,
+  season?: number,
+  minSimilarity: number = 0.0
+): Promise<HistoricalComparisonResponse | null> {
+  if (USE_LIVE_FASTAPI) {
+    try {
+      let url = `${API_BASE_URL}/evidence/historical/compare/${encodeURIComponent(candidateId)}?top_k=${topK}&min_similarity=${minSimilarity}`;
+      if (circuit) url += `&circuit=${encodeURIComponent(circuit)}`;
+      if (season) url += `&season=${season}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Live historical comparison for ${candidateId} unreachable:`, e);
     }
   }
   return null;

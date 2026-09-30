@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 import re
 
 from app.benchmark.manifest import BenchmarkManifest, load_benchmark_manifest
-from app.benchmark.comparator import HistoricalCaseComparator
+from app.benchmark.comparator import HistoricalCaseComparator, HistoricalComparisonResponse
 from app.knowledge.models import (
     HistoricalEvidenceResult,
     HistoricalSearchResult,
@@ -71,6 +71,23 @@ class HistoricalIncidentKnowledgeRetriever:
             total_comparators_considered=len(self.manifest.cases),
             matches=matches,
             non_adjudication_statement=self.NON_ADJUDICATIVE_STATEMENT,
+        )
+
+    def compare_case(
+        self,
+        candidate_id: str,
+        top_k: int = 3,
+        circuit: Optional[str] = None,
+        season: Optional[int] = None,
+        min_similarity: float = 0.0,
+    ) -> HistoricalComparisonResponse:
+        """Retrieve explainable historical comparators grounded in observable kinematics."""
+        return self.comparator.compare_case(
+            query_case_id=candidate_id,
+            top_k=top_k,
+            circuit_filter=circuit,
+            season_filter=season,
+            min_similarity=min_similarity,
         )
 
     def search_historical_cases(
