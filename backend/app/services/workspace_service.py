@@ -93,13 +93,24 @@ class StewardWorkspaceService:
         db_questions: List[UnresolvedQuestion] = []
         db_disc_annotations: List[DiscrepancyAnnotation] = []
 
+        cand_ids = [clean_cid]
+        if dossier and getattr(dossier, "candidate_id", None) and dossier.candidate_id not in cand_ids:
+            cand_ids.append(dossier.candidate_id)
+        if dossier and getattr(dossier, "incident_id", None) and dossier.incident_id not in cand_ids:
+            cand_ids.append(dossier.incident_id)
+
         if db is not None:
             stmt = select(Incident).where(
-                (Incident.candidate_id == clean_cid) | (Incident.id == clean_cid)
+                Incident.candidate_id.in_(cand_ids) | Incident.id.in_(cand_ids)
             )
             incident_record = db.scalars(stmt).first()
             if incident_record:
                 inc_id = incident_record.id
+                if incident_record.candidate_id not in cand_ids:
+                    cand_ids.append(incident_record.candidate_id)
+                if incident_record.id not in cand_ids:
+                    cand_ids.append(incident_record.id)
+
                 db_reviews = list(
                     db.scalars(
                         select(ReviewRecord)
@@ -111,7 +122,7 @@ class StewardWorkspaceService:
                     db.scalars(
                         select(EvidenceAcknowledgement)
                         .where(
-                            (EvidenceAcknowledgement.candidate_id == clean_cid)
+                            EvidenceAcknowledgement.candidate_id.in_(cand_ids)
                             | (EvidenceAcknowledgement.incident_id == inc_id)
                         )
                         .order_by(EvidenceAcknowledgement.created_at.desc())
@@ -121,7 +132,7 @@ class StewardWorkspaceService:
                     db.scalars(
                         select(UnresolvedQuestion)
                         .where(
-                            (UnresolvedQuestion.candidate_id == clean_cid)
+                            UnresolvedQuestion.candidate_id.in_(cand_ids)
                             | (UnresolvedQuestion.incident_id == inc_id)
                         )
                         .order_by(UnresolvedQuestion.created_at.desc())
@@ -131,7 +142,7 @@ class StewardWorkspaceService:
                     db.scalars(
                         select(DiscrepancyAnnotation)
                         .where(
-                            (DiscrepancyAnnotation.candidate_id == clean_cid)
+                            DiscrepancyAnnotation.candidate_id.in_(cand_ids)
                             | (DiscrepancyAnnotation.incident_id == inc_id)
                         )
                         .order_by(DiscrepancyAnnotation.created_at.desc())
@@ -162,12 +173,31 @@ class StewardWorkspaceService:
                 )
 
         # 3. Assemble Case Header Info
+        # Determine circuit name dynamically
+        cid_upper = clean_cid.upper()
+        if "AUT" in cid_upper or "SPIELBERG" in cid_upper or "RED_BULL" in cid_upper:
+            detected_circuit = "Red Bull Ring"
+        elif "USA" in cid_upper or "COTA" in cid_upper or "AUSTIN" in cid_upper:
+            detected_circuit = "Circuit of the Americas"
+        elif "MEX" in cid_upper:
+            detected_circuit = "Autódromo Hermanos Rodríguez"
+        elif "BEL" in cid_upper or "SPA" in cid_upper:
+            detected_circuit = "Circuit de Spa-Francorchamps"
+        elif "GBR" in cid_upper or "SIL" in cid_upper:
+            detected_circuit = "Silverstone Circuit"
+        elif "BRA" in cid_upper or "INT" in cid_upper:
+            detected_circuit = "Autódromo José Carlos Pace (Interlagos)"
+        elif "LVG" in cid_upper or "VEG" in cid_upper:
+            detected_circuit = "Las Vegas Strip Circuit"
+        else:
+            detected_circuit = "Autodromo Nazionale Monza"
+
         case_info = WorkspaceCaseInfo(
             candidate_id=clean_cid,
             incident_id=incident_record.id if incident_record else dossier.incident_id,
             session=dossier.session_id,
             event=dossier.event_type,
-            circuit="Monza" if "MON" in clean_cid.upper() or "ITA" in clean_cid.upper() else "Autodromo Nazionale Monza",
+            circuit=detected_circuit,
             timestamp=dossier.timeline[0].timestamp if dossier.timeline else "13:42:18.4",
             drivers=[dossier.driver_a, dossier.driver_b],
             incident_status=incident_record.status if incident_record else dossier.review_status,
@@ -269,7 +299,7 @@ class StewardWorkspaceService:
         sq_map = {sq.stream_name.lower(): sq for sq in dossier.stream_quality}
 
         # 1. Telemetry
-        tel_sq = sq_map.get("telemetry")
+        tel_sq = next((sq for sq in dossier.stream_quality if "telemetry" in sq.stream_name.lower()), None)
         summaries["telemetry"] = WorkspaceEvidenceStreamSummary(
             availability=TriageAvailability.FULL if tel_sq and tel_sq.availability == "AVAILABLE" else TriageAvailability.PARTIAL,
             epistemic_type=TriageEpistemicType.OBSERVED,
@@ -281,7 +311,7 @@ class StewardWorkspaceService:
         )
 
         # 2. Race Control
-        rc_sq = sq_map.get("race_control") or sq_map.get("regulation")
+        rc_sq = next((sq for sq in dossier.stream_quality if "race_control" in sq.stream_name.lower() or "race control" in sq.stream_name.lower()), None)
         summaries["race_control"] = WorkspaceEvidenceStreamSummary(
             availability=TriageAvailability.FULL,
             epistemic_type=TriageEpistemicType.DOCUMENTARY,
@@ -293,7 +323,7 @@ class StewardWorkspaceService:
         )
 
         # 3. Video Broadcast
-        vid_sq = sq_map.get("video")
+        vid_sq = next((sq for sq in dossier.stream_quality if "video" in sq.stream_name.lower()), None)
         is_vid_avail = vid_sq.availability == "AVAILABLE" if vid_sq else False
         summaries["video"] = WorkspaceEvidenceStreamSummary(
             availability=TriageAvailability.FULL if is_vid_avail else TriageAvailability.UNAVAILABLE,
@@ -302,8 +332,11 @@ class StewardWorkspaceService:
             provenance="FOM International Broadcast Feed" if is_vid_avail else "Unlinked Broadcast Stream",
             timestamp_coverage="00:05.000 → 00:25.000" if is_vid_avail else "0.0s",
             limitations=[
+                "Broadcast video feed is unavailable due to commercial rights and copyright restrictions.",
                 "Commercial broadcast footage is legally protected under copyright and cannot be redistributed.",
                 "Unlinked video frames are recorded as unobserved data, never as negative evidence or proof of guilt.",
+            ] if not is_vid_avail else [
+                "2D broadcast perspective foreshortening introduces parallax uncertainty.",
             ],
             contradictions=[],
         )
@@ -482,6 +515,9 @@ class StewardWorkspaceService:
                 unc = "± 0.20 m (Resampled Cartesian projection)"
             elif "video" in ev.source.lower():
                 unc = "± 0.04 s (1 frame @ 25Hz broadcast cadence)"
+
+            if unc is None:
+                unc = "± 0.04 s (25Hz uniform discretization)"
 
             e_status = (
                 TriageEpistemicType.OBSERVED

@@ -207,11 +207,36 @@ Evaluated against authoritative Monza reference cases (`REF-MONZA-01`, `REF-MONZ
 | **REF-MONZA-03 (MAG-GAS Lap 19)** | $18.80\text{ s}$ | **$0.12\text{ ms}$** | $< 500\text{ ms}$ | **PASSED** |
 
 ### Verified Workspace Guardrails
-1. **Deterministic Epistemic Triage**: Evaluated across all 18 test suite checks; evidence items are strictly ordered $1 \longrightarrow 5$ without altering adjudication data.
-2. **Reviewer Acknowledgement Non-Mutation**: Recording steward triage metadata (`CONSIDERED`, `INSUFFICIENT`, etc.) creates independent audit records without modifying source telemetry.
-3. **Unresolved Question Lifecycle**: Stewards can log factual gaps (`OPEN`), track related evidence IDs, and resolve with explicit findings (`RESOLVED`).
-4. **Discrepancy Visibility**: Cross-modal contradictions remain prominently flagged for human inspection and are never algorithmically smoothed over.
-5. **AI Non-Adjudication Refusal**: Assistant queries demanding fault assignments or penalty recommendations are unequivocally rejected with non-adjudication notices.
+---
+
+## 10. End-to-End Case Replay & Integration Reliability Evaluation (Prompt 25)
+
+For the detailed replay architecture and protocol, see:
+- [**End-to-End Validation Guide**](end-to-end-validation.md)
+- [**Prompt 25 Verification Report**](progress/PROMPT_25_REPORT.md)
+
+### Replay Evaluation Suite (`test_end_to_end_case_replay.py`)
+- **Total Test Cases**: 14
+- **Passed**: 14 (100%)
+- **Verification Dimensions**:
+  1. Full Case Replay (`REF-MONZA-01`)
+  2. Multi-Car Concertina Interactions (`REF-MONZA-02`, `REF-MONZA-03`)
+  3. Invariant Fingerprint Determinism (SHA256 bit-for-bit repeatability)
+  4. Idempotent Ingestion & Row Duplication Immunity
+  5. Honest Degraded-State Signaling (UNAVAILABLE broadcast video)
+  6. Transaction Failure Rollback & Zero-Orphan Isolation
+  7. Evidence Immutability under Reviewer Mutations
+  8. Human Review State Machine Enforcement
+  9. Assistant Grounding & 100% Adjudication Refusal
+  10. REST API Contract Regression
+  11. Cross-Circuit Generalization: Austrian GP (Red Bull Ring `HIST-2024-AUT-R-01`)
+  12. Production-Like Acceptance Scenario (Telemetry $\to$ Workspace $\to$ Review $\to$ Audit Trail)
+
+### Measured System Latency Profile
+- **Cold Case Replay** (unprimed FastF1 disk cache read & full multi-stream synthesis): $67.8\text{ s}$
+- **Warm Case Replay** (cached telemetry read & instant workspace assembly): $16.5\text{ s}$
+- **Workspace Read Model Retrieval**: $6.6\text{ ms}$
+
 
 
 

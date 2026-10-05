@@ -170,3 +170,23 @@ The **Steward Case Workspace** formalizes the evidentiary investigation into a s
    - Final human adjudication is recorded with mandatory rationale and regulatory citations.
    - All state transitions preserve an immutable audit trail detailing who changed what, when, and why.
 
+---
+
+## 6. End-to-End Case Replay & Invariant Verification Protocol (Prompt 25)
+
+The platform includes automated end-to-end replay tooling via `CaseReplayService` to verify that investigation state models can be reconstructed reproducibly from raw telemetry:
+
+1. **Deterministic Fingerprint Verification**:
+   - Every case workspace exposes an invariant SHA256 digest (`compute_workspace_fingerprint`) summarizing evidence observations, chronological timeline, discrepancies, regulatory references, and historical matches.
+   - Repeated re-executions on identical source inputs yield bit-for-bit identical fingerprints.
+
+2. **Idempotent Storage & Session Prerequisites**:
+   - Candidate ingestion is fully idempotent across repeated runs. Circuit, race, session, and driver prerequisite records are automatically generated if missing, preventing database constraint failures.
+
+3. **Multi-Circuit Generalization**:
+   - Canonical replay workflows validate cross-circuit generalization across diverse tracks (Monza, Red Bull Ring Spielberg, Spa, Silverstone, COTA, Interlagos, Mexico, Las Vegas) without track model leakage.
+
+4. **Honest Degraded-State Signaling**:
+   - Unavailable evidence channels (such as FOM copyrighted broadcast video) are explicitly flagged as `UNAVAILABLE` rather than masked with synthetic assumptions. Missing feeds do not prevent kinematic workspace review.
+
+

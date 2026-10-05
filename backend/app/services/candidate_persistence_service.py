@@ -123,10 +123,72 @@ class CandidatePersistenceService:
         if sess:
             return sess
 
-        # Extract season and grand prix name if parsable, e.g. f1-2024-italian grand prix-race
-        race_id = "f1-2024-monza"
-        race_name = "Italian Grand Prix"
-        season_str = "2024"
+        # Extract season and grand prix name if parsable, e.g. f1-2024-austrian grand prix-race
+        sess_lower = session_id.lower()
+        if "austri" in sess_lower or "red-bull" in sess_lower or "spielberg" in sess_lower or "aut" in sess_lower:
+            race_id = "f1-2024-austria"
+            race_name = "Austrian Grand Prix"
+            season_str = "2024"
+            round_num = 11
+            circuit = "Red Bull Ring"
+            country = "Austria"
+            city = "Spielberg"
+        elif "usa" in sess_lower or "cota" in sess_lower or "austin" in sess_lower:
+            race_id = "f1-2024-usa"
+            race_name = "United States Grand Prix"
+            season_str = "2024"
+            round_num = 19
+            circuit = "Circuit of the Americas"
+            country = "United States"
+            city = "Austin"
+        elif "mex" in sess_lower:
+            race_id = "f1-2024-mexico"
+            race_name = "Mexico City Grand Prix"
+            season_str = "2024"
+            round_num = 20
+            circuit = "Autódromo Hermanos Rodríguez"
+            country = "Mexico"
+            city = "Mexico City"
+        elif "bel" in sess_lower or "spa" in sess_lower:
+            race_id = "f1-2024-belgium"
+            race_name = "Belgian Grand Prix"
+            season_str = "2024"
+            round_num = 14
+            circuit = "Spa-Francorchamps"
+            country = "Belgium"
+            city = "Spa"
+        elif "gbr" in sess_lower or "silverstone" in sess_lower or "sil" in sess_lower:
+            race_id = "f1-2024-britain"
+            race_name = "British Grand Prix"
+            season_str = "2024"
+            round_num = 12
+            circuit = "Silverstone"
+            country = "United Kingdom"
+            city = "Silverstone"
+        elif "bra" in sess_lower or "interlagos" in sess_lower or "sao-paulo" in sess_lower:
+            race_id = "f1-2024-brazil"
+            race_name = "São Paulo Grand Prix"
+            season_str = "2024"
+            round_num = 21
+            circuit = "Interlagos"
+            country = "Brazil"
+            city = "São Paulo"
+        elif "las-vegas" in sess_lower or "lvg" in sess_lower or "veg" in sess_lower:
+            race_id = "f1-2024-lasvegas"
+            race_name = "Las Vegas Grand Prix"
+            season_str = "2024"
+            round_num = 22
+            circuit = "Las Vegas Strip Circuit"
+            country = "United States"
+            city = "Las Vegas"
+        else:
+            race_id = "f1-2024-monza"
+            race_name = "Italian Grand Prix"
+            season_str = "2024"
+            round_num = 16
+            circuit = "Monza"
+            country = "Italy"
+            city = "Monza"
 
         race = db.get(Race, race_id)
         if not race:
@@ -134,11 +196,11 @@ class CandidatePersistenceService:
                 id=race_id,
                 series="Formula 1",
                 season=season_str,
-                round=16,
+                round=round_num,
                 name=race_name,
-                circuit="Monza",
-                country="Italy",
-                city="Monza",
+                circuit=circuit,
+                country=country,
+                city=city,
                 source="fastf1",
             )
             db.add(race)

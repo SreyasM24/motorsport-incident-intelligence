@@ -616,4 +616,33 @@ Returns the master investigation workspace read model aggregating case metadata,
 }
 ```
 
+---
+
+## 13. Case Replay Service & Invariant Testing (Prompt 25)
+
+The `CaseReplayService` (`app.services.case_replay_service.CaseReplayService`) provides programmatic and test harnesses to validate complete end-to-end incident reconstructions.
+
+### Python Interface: `CaseReplayService.replay_case`
+```python
+result = CaseReplayService.replay_case(
+    case_id="REF-MONZA-01",
+    db=db_session,
+    simulate_review=True,
+    reviewer_id="lead-steward",
+    force_refresh=True,
+)
+```
+
+**Returns `CaseReplayResult`:**
+- `case_id` (str): Identifier of the replayed candidate or benchmark case.
+- `incident_id` (str): Database primary key of the persisted incident record.
+- `is_created_in_db` (bool): `True` if new record created, `False` if idempotently deduplicated.
+- `persisted_fingerprint` (str): Canonical SHA256 candidate fingerprint stored in database.
+- `determinism_fingerprint` (str): Invariant workspace SHA256 digest covering triage, timeline, discrepancies, regulations, and comparables.
+- `timings` (`ReplayTimings`): Structured performance breakdown (reconstruction, dossier synthesis, persistence, workspace assembly, review simulation, total latency).
+- `workspace` (`StewardCaseWorkspace`): Complete read model for steward inspection.
+- `review_simulation` (dict): Audit records of simulated steward lifecycle actions.
+- `contract_assertions` (dict[str, bool]): Verification of all 12 platform integration dimensions.
+
+
 

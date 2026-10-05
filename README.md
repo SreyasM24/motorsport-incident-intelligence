@@ -296,6 +296,8 @@ motorsport-incident-intelligence/
 │   ├── api.md
 │   ├── data-provenance.md
 │   ├── evaluation.md
+│   ├── end-to-end-validation.md # E2E steward replay & invariant validation
+│   ├── steward-workflow.md   # Steward operating workflow protocol
 │   ├── limitations.md
 │   └── deployment.md
 ├── frontend/                 # React 19 TypeScript frontend

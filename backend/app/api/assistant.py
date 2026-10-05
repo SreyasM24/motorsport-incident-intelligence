@@ -35,11 +35,13 @@ def query_assistant(
     # Mandatory Refusal of Guilt / Fault / Penalty Determination
     if (
         any(k in query_lower for k in [
-            "at fault", "is guilty", "'s guilty", "who caused", "penalized", "penalty recommend",
-            "fault split", "fault probability", "guilty driver", "decide penalty", "assign blame",
-            "who should get a penalty", "give a penalty", "deserves a penalty", "deserve a penalty"
+            "at fault", "fault", "is guilty", "'s guilty", "guilty", "guilt",
+            "caused", "cause of", "who caused", "penalized", "penalty recommend",
+            "fault split", "fault probability", "guilty driver", "decide penalty", "assign blame", "blame",
+            "who should get a penalty", "give a penalty", "deserves a penalty", "deserve a penalty",
+            "liable", "liability"
         ])
-        or ("penalty" in query_lower and any(w in query_lower for w in ["recommend", "should", "who", "suggest", "deserve", "impose", "decide"]))
+        or ("penalty" in query_lower and any(w in query_lower for w in ["recommend", "should", "who", "suggest", "deserve", "impose", "decide", "give", "what"]))
     ):
         text = (
             "NON-ADJUDICATION GUARDRAIL REFUSAL:\n\n"

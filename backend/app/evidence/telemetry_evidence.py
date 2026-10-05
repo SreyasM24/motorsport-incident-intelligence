@@ -72,7 +72,41 @@ def build_telemetry_evidence(
     evidence_strength: int = 50,
 ) -> TelemetryEvidenceSummary:
     """Extract compact telemetry evidence and data quality statistics from synchronized frames."""
+    if not raw_frames:
+        return TelemetryEvidenceSummary(
+            driver_a=driver_a,
+            driver_b=driver_b,
+            event_start="",
+            event_peak="",
+            event_end="",
+            duration_seconds=0.0,
+            minimum_gap_meters=0.0,
+            gap_at_peak_meters=0.0,
+            peak_closing_speed_ms=0.0,
+            closing_speed_at_peak_ms=0.0,
+            speed_a_kmh=0.0,
+            speed_b_kmh=0.0,
+            speed_delta_kmh=0.0,
+            throttle_a_pct=0.0,
+            throttle_b_pct=0.0,
+            brake_a_pct=0.0,
+            brake_b_pct=0.0,
+            brake_delta_pct=0.0,
+            accel_a_g=0.0,
+            accel_b_g=0.0,
+            decel_delta_g=0.0,
+            total_frames=0,
+            data_coverage_pct=0.0,
+            interpolation_pct=0.0,
+            missing_data_pct=100.0,
+            telemetry_evidence_strength=evidence_strength,
+            raw_stream_ref=f"/api/v1/telemetry/pair-stream?driver_a={driver_a}&driver_b={driver_b}",
+        )
+
     sub_frames = raw_frames[start_index : end_index + 1]
+    if not sub_frames:
+        sub_frames = raw_frames
+
     peak_frame = raw_frames[peak_index] if peak_index < len(raw_frames) else sub_frames[0]
 
     min_gap = min((f.gap_meters for f in sub_frames), default=0.0)
