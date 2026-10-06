@@ -189,4 +189,22 @@ The platform includes automated end-to-end replay tooling via `CaseReplayService
 4. **Honest Degraded-State Signaling**:
    - Unavailable evidence channels (such as FOM copyrighted broadcast video) are explicitly flagged as `UNAVAILABLE` rather than masked with synthetic assumptions. Missing feeds do not prevent kinematic workspace review.
 
+---
+
+## 7. Machine Learning Evidence Governance Protocol (Prompt 26)
+
+When stewards inspect `MODEL_DERIVED` items in the dossier:
+
+1. **Epistemic Classification**:
+   - The ML score is classified as `MODEL_DERIVED`. It is derived mathematically from physical sensor channels (25Hz Cartesian, ECU CAN-bus) and baseline geometry.
+2. **Interpretation Contract**:
+   - `interaction_pattern_probability` indicates whether the physical dynamics match an **anomalous interaction pattern** compared to nominal racing.
+   - It **does not** indicate guilt, blame, fault, or regulatory breach.
+3. **Calibration Status & Uncertainty**:
+   - The active model reports `CALIBRATION_STATUS = INSUFFICIENT_DATA`.
+   - Stewards must evaluate the empirical uncertainty band ($\pm 0.10$ to $\pm 0.20$) and examine the underlying primary telemetry before drawing conclusions.
+4. **Strict Identity Invariance**:
+   - Stewards are assured that driver identities, team names, championship standings, and previous penalties have zero mathematical impact on the model score.
+
+
 

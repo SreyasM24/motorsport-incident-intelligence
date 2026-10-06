@@ -237,6 +237,28 @@ For the detailed replay architecture and protocol, see:
 - **Warm Case Replay** (cached telemetry read & instant workspace assembly): $16.5\text{ s}$
 - **Workspace Read Model Retrieval**: $6.6\text{ ms}$
 
+---
+
+## 11. Machine Learning Evidence Governance & Evaluation (Prompt 26)
+
+For detailed governance, model card, and dataset documentation, see:
+- [**ML Model Card**](ml-model-card.md)
+- [**ML Dataset Card**](ml-dataset-card.md)
+- [**ML Governance Audit**](progress/PROMPT_26_ML_AUDIT.md)
+
+### Canonical ML Governance Summary
+- **Target Task:** Binary interaction anomaly ranking ($y=1$ vs $y=0$). This models physical interaction resemblance only; it never predicts fault, guilt, or penalty recommendations.
+- **Feature Governance:** 24 canonical features across Kinematics (DERIVED), Reference Baseline (MODEL_DERIVED), Corner Geometry (MODEL_DERIVED), and Data Quality (OBSERVED).
+- **Forbidden Attribute Enforcement:** Driver identity, team identity, championship ranking, driver nationality, driver reputation, and steward penalty outcomes are strictly prohibited at the schema level.
+- **Invariance Verification:** 100% verified invariance to driver name, team affiliation, nationality, and historical penalty records.
+- **Calibration Status:** Honestly designated `CALIBRATION_STATUS = INSUFFICIENT_DATA` due to prototype sample scale ($N=17$).
+- **Cross-Circuit Evaluation:** Evaluated across Monza (Italian GP) and Red Bull Ring (Austrian GP) using Leave-One-Circuit-Out cross-validation.
+- **Empirical Execution Latency:**
+  - Feature extraction: $0.099\text{ ms}$ per interaction window
+  - Model inference latency: $0.779\text{ ms}$ per candidate
+  - Full evaluation runtime (LOGO-CV, LOCO-CV, 5 ablations, 6 missingness dropouts): $3.55\text{ s}$
+
+
 
 
 

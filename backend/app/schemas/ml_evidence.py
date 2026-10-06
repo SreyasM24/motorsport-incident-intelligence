@@ -54,6 +54,18 @@ class MLEvidence(BaseModel):
         le=1.0,
         description="Model-estimated probability that observed interaction features represent an incident candidate pattern.",
     )
+    interaction_pattern_probability: Optional[float] = Field(
+        default=None,
+        description="Canonical Prompt 26 contract name: probability of anomalous interaction pattern (non-adjudicative).",
+    )
+    model_confidence: Optional[float] = Field(
+        default=None,
+        description="Model classification confidence: max(P(pattern=1), P(pattern=0)).",
+    )
+    calibration_status: str = Field(
+        default="INSUFFICIENT_DATA",
+        description="Statistical calibration status (INSUFFICIENT_DATA due to sample volume constraints).",
+    )
     predicted_label: int = Field(
         ...,
         description="Binary classification indicator: 1 = INCIDENT_CANDIDATE, 0 = NOMINAL_RACING",
@@ -78,6 +90,15 @@ class MLEvidence(BaseModel):
         "It DOES NOT evaluate fault, guilt, breach of sporting code, or steward penalties. "
         "Final adjudication rests entirely with the human steward panel."
     )
+    non_adjudication_statement: str = Field(
+        default="This model output describes an observable interaction pattern and is not an adjudicative conclusion."
+    )
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.interaction_pattern_probability is None:
+            self.interaction_pattern_probability = self.candidate_probability
+        if self.model_confidence is None:
+            self.model_confidence = round(max(self.candidate_probability, 1.0 - self.candidate_probability), 4)
 
 
 class BenchmarkEvaluationResponse(BaseModel):
@@ -89,8 +110,52 @@ class BenchmarkEvaluationResponse(BaseModel):
     ml_model_cv_metrics: Dict[str, Any]
     statistical_status: str
     honest_assessment: str
+    calibration_status: str = "INSUFFICIENT_DATA"
+    season_generalization: str = "INSUFFICIENT_DATA"
     model_comparison: Optional[Dict[str, Any]] = None
     comparison_table: Optional[List[Dict[str, Any]]] = None
     error_analysis: Optional[Dict[str, Any]] = None
     dataset_summary: Optional[Dict[str, Any]] = None
+    feature_ablations: Optional[Dict[str, Any]] = None
+    missingness_robustness: Optional[Dict[str, Any]] = None
+    model_version: str = "v1.1"
+    feature_version: str = "v1.1"
+    dataset_version: str = "v1.1"
+
+
+
+class MLFeaturesRegistryResponse(BaseModel):
+    """Structured response for ML feature registry discovery."""
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    feature_version: str = "v1.1"
+    total_features: int
+    allowed_features_count: int
+    forbidden_features_count: int
+    features: Dict[str, Any]
+
+
+class MLModelCardResponse(BaseModel):
+    """Structured response for ML model card metadata."""
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    model_name: str
+    model_version: str
+    feature_version: str
+    dataset_version: str
+    model_family: str
+    target_definition: Dict[str, str]
+    intended_use: str
+    prohibited_use: str
+    training_data: Dict[str, Any]
+    label_provenance: str
+    calibration_status: str
+    season_generalization: str
+    limitations: List[str]
+    deployment_status: str
+    non_adjudication_statement: str
+
+
 

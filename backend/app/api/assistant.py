@@ -99,7 +99,70 @@ def query_assistant(
             links = []
             follow_ups = ["What changed in the telemetry?", "Which regulations may be relevant?"]
 
+    elif any(k in query_lower for k in [
+        "what does the model detect", "how confident is the model", "confidence of the model",
+        "how was the model evaluated", "how was the model tested", "what evidence does the model use",
+        "ml model", "machine learning model"
+    ]):
+
+        if "detect" in query_lower:
+            text = (
+                "ML MODEL DETECTION SCOPE:\n\n"
+                "• The ML model detects observable physical INTERACTION ANOMALY PATTERNS (y=1 vs y=0).\n"
+                "• Positive Pattern (y=1): Close proximity (<1.5m), high rate of closure (>3.5m/s), "
+                "trajectory deviation from reference lap, or apex overlap with constrained exit clearance.\n"
+                "• Nominal Pattern (y=0): Clean overtakes, routine slipstreaming, compliant cornering.\n\n"
+                "CRITICAL NON-ADJUDICATIVE NOTICE: The model classifies physical interaction mechanics only. "
+                "It does NOT detect guilt, fault, breach of rules, or penalty justification."
+            )
+            chips = [
+                EvidenceChip(label="Target: ANOMALOUS_PATTERN", type="telemetry"),
+                EvidenceChip(label="Status: NON_ADJUDICATIVE", type="status"),
+            ]
+        elif "confident" in query_lower or "confidence" in query_lower:
+            text = (
+                "ML MODEL CONFIDENCE & UNCERTAINTY:\n\n"
+                "• Model Confidence reflects interaction pattern resemblance: max(P(pattern=1), P(pattern=0)).\n"
+                "• Output Metric: interaction_pattern_probability with a ±0.10 to ±0.20 empirical uncertainty interval.\n"
+                "• Calibration Status: INSUFFICIENT_DATA (sample cohort N=17 is mathematically insufficient for isotonic calibration).\n\n"
+                "CRITICAL NOTICE: High model confidence means the physical trajectory strongly matches an anomalous interaction pattern. "
+                "It does NOT mean a driver was at fault or should be penalized."
+            )
+            chips = [
+                EvidenceChip(label="Confidence: PATTERN_RESEMBLANCE", type="telemetry"),
+                EvidenceChip(label="Calibration: INSUFFICIENT_DATA", type="status"),
+            ]
+        elif "evaluated" in query_lower or "tested" in query_lower:
+            text = (
+                "ML MODEL EVALUATION METHODOLOGY:\n\n"
+                "• Protocol: Leave-One-Group-Out (LOGO-CV) across 17 interaction groups, and Leave-One-Circuit-Out (LOCO-CV).\n"
+                "• Datasets: Multi-circuit cohort (Monza 2024 and Red Bull Ring 2024, N=17 supervised samples).\n"
+                "• Leakage Controls: Driver identities, teams, car numbers, and steward penalty outcomes are strictly excluded.\n"
+                "• Readiness Status: PROTOTYPE_MULTI_CIRCUIT_EVALUATION. The model provides non-binding decision support for human stewards."
+            )
+            chips = [
+                EvidenceChip(label="Scheme: LOGO_AND_LOCO_CV", type="telemetry"),
+                EvidenceChip(label="Readiness: PROTOTYPE", type="status"),
+            ]
+        else:
+            text = (
+                "ML MODEL EVIDENCE SOURCES:\n\n"
+                "The ML model ingests 24 tabular features across 4 epistemically governed categories:\n"
+                "1. Kinematics (DERIVED): min_gap_m, peak_closing_speed_ms, speed_delta_kmh, brake_delta_pct, accel_delta_g.\n"
+                "2. Reference Baseline (MODEL_DERIVED): max_trajectory_dev_m, braking_onset_delta_m, apex_speed_dev_kmh.\n"
+                "3. Overtake Geometry (MODEL_DERIVED): apex_overlap_pct, front_axle_gap_m, exit_clearance_m.\n"
+                "4. Data Quality (OBSERVED): sync_flag, sample_density, explicit missing sensor indicators.\n\n"
+                "All driver identity, team identity, championship ranking, and penalty outcome features are FORBIDDEN."
+            )
+            chips = [
+                EvidenceChip(label="Features: 24_CANONICAL", type="telemetry"),
+                EvidenceChip(label="Governance: ZERO_IDENTITY_BIAS", type="status"),
+            ]
+        links = [EvidenceLink(label="View ML Evaluation", target_view="/analysis/ml/evaluation", incident_id=incident_ref)]
+        follow_ups = ["What evidence is currently available?", "What contradictions remain?", "Which regulations may be relevant?"]
+
     elif any(k in query_lower for k in ["contradiction", "discrepanc", "conflict"]):
+
         from app.services.workspace_service import StewardWorkspaceService
         try:
             ws = StewardWorkspaceService.get_workspace(incident_ref, db=db)

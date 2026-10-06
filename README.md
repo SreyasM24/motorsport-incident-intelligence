@@ -296,10 +296,13 @@ motorsport-incident-intelligence/
 │   ├── api.md
 │   ├── data-provenance.md
 │   ├── evaluation.md
+│   ├── ml-model-card.md      # ML interaction model card & governance declaration
+│   ├── ml-dataset-card.md    # Multi-circuit dataset manifest card & provenance
 │   ├── end-to-end-validation.md # E2E steward replay & invariant validation
 │   ├── steward-workflow.md   # Steward operating workflow protocol
 │   ├── limitations.md
 │   └── deployment.md
+
 ├── frontend/                 # React 19 TypeScript frontend
 │   ├── public/               # Static assets & SVG icons
 │   ├── src/                  # Application source code

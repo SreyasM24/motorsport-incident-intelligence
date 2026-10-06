@@ -39,34 +39,85 @@ class LabelProvenance(str, Enum):
     UNVERIFIED = "UNVERIFIED"                        # Ambiguous or non-collision incident -> EXCLUDED from training
 
 
+class InclusionStatus(str, Enum):
+    """Explicit dataset inclusion states for ML governance."""
+    VERIFIED = "VERIFIED"                  # Fully verified observation included in supervised training/scoring
+    UNVERIFIED = "UNVERIFIED"              # Ambiguous or unverified observation
+    EXCLUDED = "EXCLUDED"                  # Explicitly excluded from supervised training loss
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA" # Partial data lacking primary channels
+
+
+class LabelSource(str, Enum):
+    """Authoritative source origin for supervised labels."""
+    OFFICIAL_FIA_DOCUMENT = "OFFICIAL_FIA_DOCUMENT"
+    OFFICIAL_RACE_CONTROL = "OFFICIAL_RACE_CONTROL"
+    VERIFIED_REFERENCE_CASE = "VERIFIED_REFERENCE_CASE"
+    EXPERT_ANNOTATION = "EXPERT_ANNOTATION"
+    UNVERIFIED = "UNVERIFIED"
+
+
 class MLSample(BaseModel):
     """A single tabular training or evaluation observation with full provenance metadata."""
 
     sample_id: str
-    session_id: str
+    example_id: Optional[str] = None
+    source_case_id: Optional[str] = None
+    series: str = "Formula 1"
+    season: int = 2024
+    event: str = "Italian Grand Prix"
     race: str = "Italian Grand Prix"
     circuit: str = "Monza"
     circuit_id: str = "monza"
-    season: int = 2024
     session: str = "Race"
+    session_id: str
     lap: Optional[int] = None
     driver_a: Optional[str] = None
     driver_b: Optional[str] = None
+    driver_identifiers: List[str] = Field(default_factory=list, description="Driver provenance only; strictly excluded from model features")
     interaction_window: Optional[str] = None
 
     group_id: str = Field(..., description="Grouping identifier for leak-free GroupKFold partitioning")
+    split_group: Optional[str] = None
     label: int = Field(..., description="1 = INCIDENT_CANDIDATE, 0 = NOMINAL_RACING")
     label_name: str
     label_provenance: LabelProvenance = LabelProvenance.CONTROL_NOMINAL
+    label_source: LabelSource = LabelSource.VERIFIED_REFERENCE_CASE
+    label_confidence: float = 1.0
+    evidence_available: List[str] = Field(default_factory=lambda: ["telemetry", "baseline", "geometry"])
+    inclusion_status: InclusionStatus = InclusionStatus.VERIFIED
     supervised_include: bool = Field(
         default=True,
-        description="False if UNVERIFIED or ambiguous (excluded from supervised training loss)",
+        description="False if UNVERIFIED, EXCLUDED or ambiguous (excluded from supervised training loss)",
     )
 
     source: str = "FastF1 ECU CAN-Bus + FIA Official Stewards Documents"
     feature_version: str = FEATURE_VERSION
+    analysis_version: str = "v1.1"
     features: Dict[str, float]
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.example_id is None:
+            self.example_id = self.sample_id
+        if self.source_case_id is None:
+            self.source_case_id = self.sample_id
+        if self.split_group is None:
+            self.split_group = self.group_id
+        if not self.driver_identifiers:
+            drivers = [d for d in [self.driver_a, self.driver_b] if d and d != "NONE"]
+            self.driver_identifiers = drivers
+        if self.label_provenance == LabelProvenance.REFERENCE_INCIDENT:
+            self.label_source = LabelSource.OFFICIAL_FIA_DOCUMENT
+            self.inclusion_status = InclusionStatus.VERIFIED
+        elif self.label_provenance == LabelProvenance.DOCUMENTED_INCIDENT:
+            self.label_source = LabelSource.OFFICIAL_RACE_CONTROL
+            self.inclusion_status = InclusionStatus.VERIFIED
+        elif self.label_provenance == LabelProvenance.CONTROL_NOMINAL:
+            self.label_source = LabelSource.VERIFIED_REFERENCE_CASE
+            self.inclusion_status = InclusionStatus.VERIFIED
+        elif self.label_provenance == LabelProvenance.UNVERIFIED or not self.supervised_include:
+            self.label_source = LabelSource.UNVERIFIED
+            self.inclusion_status = InclusionStatus.EXCLUDED
 
     @property
     def provenance(self) -> LabelProvenance:
@@ -176,6 +227,31 @@ class MLDataset(BaseModel):
                 "Cross-circuit generalization across high/low downforce tracks requires continuous expansion."
             ),
         }
+
+    def export_manifest(self) -> List[Dict[str, Any]]:
+        """Export canonical dataset manifest records with strict governance metadata."""
+        records = []
+        for s in self.samples:
+            records.append({
+                "example_id": s.example_id or s.sample_id,
+                "source_case_id": s.source_case_id or s.sample_id,
+                "series": s.series,
+                "season": s.season,
+                "event": s.event,
+                "circuit": s.circuit,
+                "session": s.session,
+                "driver_identifiers": s.driver_identifiers,
+                "label": s.label,
+                "label_source": s.label_source.value,
+                "label_confidence": s.label_confidence,
+                "evidence_available": s.evidence_available,
+                "feature_version": s.feature_version,
+                "analysis_version": s.analysis_version,
+                "split_group": s.split_group or s.group_id,
+                "inclusion_status": s.inclusion_status.value,
+            })
+        return records
+
 
 
 # ==============================================================================

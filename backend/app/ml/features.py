@@ -11,6 +11,8 @@ CRITICAL GUARDRAILS & MISSING-VALUE INTEGRITY (PROMPT 11):
 from typing import Any, Dict, List, Optional
 import numpy as np
 
+from app.ml.registry import FORBIDDEN_FEATURE_NAMES
+
 # Canonical feature schema for Prompt 10 backwards-compatibility
 FEATURE_NAMES_V1 = [
     "min_gap_m",
@@ -109,6 +111,9 @@ def extract_features_from_dict(
     Preserves unobserved sensor flags rather than silently imputing misleading zero observations.
     """
     schema = feature_schema or FEATURE_NAMES
+    for name in schema:
+        if name in FORBIDDEN_FEATURE_NAMES:
+            raise ValueError(f"CRITICAL_ML_GOVERNANCE_VIOLATION: Feature '{name}' is strictly FORBIDDEN.")
     features: Dict[str, float] = {}
 
     for name in schema:
@@ -259,4 +264,7 @@ def vectorize_features(
 ) -> np.ndarray:
     """Convert feature dictionary to 1D numpy array ordered by the chosen feature schema."""
     schema = feature_schema or FEATURE_NAMES
+    for name in schema:
+        if name in FORBIDDEN_FEATURE_NAMES:
+            raise ValueError(f"CRITICAL_ML_GOVERNANCE_VIOLATION: Feature '{name}' is strictly FORBIDDEN.")
     return np.array([features.get(name, DEFAULT_FEATURE_VALUES.get(name, 0.0)) for name in schema], dtype=np.float64)

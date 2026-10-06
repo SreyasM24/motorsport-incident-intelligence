@@ -203,6 +203,9 @@ class CandidateInteractionClassifier:
         return MLEvidence(
             incident_id=incident_id,
             candidate_probability=prob,
+            interaction_pattern_probability=prob,
+            model_confidence=round(max(prob, 1.0 - prob), 4),
+            calibration_status="INSUFFICIENT_DATA",
             predicted_label=predicted_label,
             decision_threshold=self.decision_threshold,
             classification=classification,
@@ -215,7 +218,11 @@ class CandidateInteractionClassifier:
                 "It DOES NOT evaluate fault, guilt, breach of sporting code, or steward penalties. "
                 "Final adjudication rests entirely with the human steward panel."
             ),
+            non_adjudication_statement=(
+                "This model output describes an observable interaction pattern and is not an adjudicative conclusion."
+            ),
         )
+
 
 
 class CandidateRandomForestClassifier:

@@ -237,6 +237,11 @@ class StewardDossierSynthesizer:
         # --- ML INTERACTION EVIDENCE (MODEL_DERIVED) ---
         if dossier.ml_evidence:
             ml = dossier.ml_evidence
+            calib_status = getattr(ml, "calibration_status", "INSUFFICIENT_DATA")
+            model_ver = getattr(ml.model_metadata, "model_name", "LogisticRegression_L2_v1.1")
+            feat_ver = getattr(ml.model_metadata, "feature_version", "v1.1")
+            scope_str = getattr(ml.model_metadata, "dataset_scope", "Multi-Circuit Reference Cohort")
+            conf_val = getattr(ml, "model_confidence", round(max(ml.candidate_probability, 1.0 - ml.candidate_probability), 3))
             evidence_items.append(
                 EvidenceItem(
                     evidence_id=f"EV-{cid}-ML-SCORE",
@@ -244,20 +249,31 @@ class StewardDossierSynthesizer:
                     source_layer="Interaction Pattern Classifier",
                     status=EvidenceStatus.MODEL_DERIVED,
                     observation=f"Interaction Anomaly Likelihood: {ml.candidate_probability * 100:.1f}% ({ml.classification})",
-                    value=round(ml.candidate_probability, 3),
+                    value={
+                        "interaction_pattern_probability": round(ml.candidate_probability, 3),
+                        "model_confidence": conf_val,
+                        "model_version": model_ver,
+                        "feature_version": feat_ver,
+                        "training_scope": scope_str,
+                        "calibration_status": calib_status,
+                        "evidence_availability": "TELEMETRY_AND_GEOMETRY_DERIVED",
+                    },
                     unit="probability",
                     timestamp=cand.event_peak,
                     event_relative_time_sec=0.0,
-                    confidence_or_quality=f"LOGOCV Validated (Threshold {ml.decision_threshold:.2f})",
+                    confidence_or_quality=f"Confidence {conf_val * 100:.1f}% | LOGOCV (Threshold {ml.decision_threshold:.2f})",
                     measurement_basis="LOGISTIC_INTERACTION_CLASSIFIER_PROBABILITY",
-                    provenance="MLCandidateClassifier",
+                    provenance=f"{model_ver} (Trained on {scope_str})",
                     limitations=[
                         "Model evaluates mathematical interaction pattern resemblance only",
-                        "Does NOT infer driver intent, fault, guilt, or penalty recommendations",
+                        f"Calibration status: {calib_status} (uncalibrated probability due to sample volume constraints)",
+                        f"Model version: {model_ver} | Feature version: {feat_ver}",
+                        "Strictly non-adjudicative: does NOT infer driver intent, fault, guilt, or penalty recommendations",
                     ],
                     parent_evidence_ids=[tel_root_id, tel_gap_id, tel_closing_id],
                 )
             )
+
 
         # --- VIDEO EVIDENCE (OBSERVED / UNAVAILABLE) ---
         vid = dossier.video_evidence

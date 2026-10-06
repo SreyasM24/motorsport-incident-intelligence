@@ -644,5 +644,85 @@ result = CaseReplayService.replay_case(
 - `review_simulation` (dict): Audit records of simulated steward lifecycle actions.
 - `contract_assertions` (dict[str, bool]): Verification of all 12 platform integration dimensions.
 
+---
+
+## 14. Machine Learning Evidence Governance & Evaluation API (Prompt 26)
+
+### 14.1 Retrieve ML Evaluation Report
+`GET /api/v1/analysis/ml/evaluation`
+
+Returns comprehensive leave-one-group-out cross-validation metrics, multi-circuit transfer results (LOCO), feature ablations, missing-data audits, and honest calibration status.
+
+**Response `200 OK`**:
+```json
+{
+  "deterministicBaseline": {
+    "name": "Deterministic Kinematic Candidate Detector (Prompt 05/06)",
+    "recall": 1.0,
+    "precision": 0.3
+  },
+  "mlModelCvMetrics": {
+    "name": "Standardized L2-Regularized Logistic Regression",
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1Score": 1.0,
+    "specificity": 1.0,
+    "brierScore": 0.0423
+  },
+  "calibrationStatus": "INSUFFICIENT_DATA",
+  "seasonGeneralization": "INSUFFICIENT_DATA",
+  "modelVersion": "v1.1",
+  "featureVersion": "v1.1",
+  "datasetVersion": "v1.1"
+}
+```
+
+### 14.2 Discover Feature Registry & Governance Status
+`GET /api/v1/analysis/ml/features`
+
+Returns the canonical registry of all 24 allowed features and cataloged forbidden features with units, sources, and epistemic classifications.
+
+**Response `200 OK`**:
+```json
+{
+  "featureVersion": "v1.1",
+  "totalFeatures": 33,
+  "allowedFeaturesCount": 24,
+  "forbiddenFeaturesCount": 9,
+  "features": {
+    "min_gap_m": {
+      "featureName": "min_gap_m",
+      "governanceStatus": "ALLOWED",
+      "epistemicType": "DERIVED",
+      "units": "meters"
+    },
+    "fia_penalty_outcome": {
+      "featureName": "fia_penalty_outcome",
+      "governanceStatus": "FORBIDDEN",
+      "epistemicType": "DOCUMENTARY",
+      "leakageRisk": "FATAL_ADJUDICATIVE_LEAKAGE"
+    }
+  }
+}
+```
+
+### 14.3 Inspect ML Model Card
+`GET /api/v1/analysis/ml/model-card`
+
+Returns structured model card declaring intended use, prohibited use, target definition, label provenance, calibration status, and non-adjudication guarantee.
+
+**Response `200 OK`**:
+```json
+{
+  "modelName": "CandidateInteractionClassifier_v1.1",
+  "modelFamily": "Standardized L2-Regularized Logistic Regression",
+  "intendedUse": "Decision-support candidate interaction ranking for human FIA race stewards.",
+  "prohibitedUse": "Autonomous adjudication, driver guilt prediction, penalty assignment, liability determination, or sporting sanctions.",
+  "calibrationStatus": "INSUFFICIENT_DATA",
+  "nonAdjudicationStatement": "This is an evidence-support model, not an automated steward."
+}
+```
+
+
 
 

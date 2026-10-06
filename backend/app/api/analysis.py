@@ -5,8 +5,14 @@ from sqlalchemy.orm import Session
 from app.database.connection import get_db
 from app.evidence.baseline_models import BaselineEvidence
 from app.schemas.overtake_geometry import OvertakeGeometryEvidence
-from app.schemas.ml_evidence import MLEvidence, BenchmarkEvaluationResponse
+from app.schemas.ml_evidence import (
+    BenchmarkEvaluationResponse,
+    MLEvidence,
+    MLFeaturesRegistryResponse,
+    MLModelCardResponse,
+)
 from app.evidence.video_evidence import VideoEvidenceSummary
+
 from app.evidence.visual import VisualEvidenceSummary
 from app.evidence.cv import CVIncidentAnalysisResponse, get_cv_service
 from app.evidence.cv.eval import (
@@ -339,6 +345,69 @@ def get_ml_benchmark_evaluation_endpoint() -> BenchmarkEvaluationResponse:
     report = BenchmarkEvaluationReport()
     data = report.evaluate_leave_one_group_out()
     return BenchmarkEvaluationResponse(**data)
+
+
+@router.get(
+    "/ml/features",
+    response_model=MLFeaturesRegistryResponse,
+    summary="Retrieve canonical ML feature registry and governance classifications",
+)
+def get_ml_features_endpoint() -> MLFeaturesRegistryResponse:
+    """Retrieve canonical feature registry, epistemic types, and governance classifications."""
+    from app.ml.registry import get_feature_registry
+    registry = get_feature_registry()
+    return MLFeaturesRegistryResponse(
+        feature_version="v1.1",
+        total_features=len(registry),
+        allowed_features_count=len([m for m in registry.values() if m.governance_status.value == "ALLOWED"]),
+        forbidden_features_count=len([m for m in registry.values() if m.governance_status.value == "FORBIDDEN"]),
+        features={k: v.model_dump() for k, v in registry.items()},
+    )
+
+
+@router.get(
+    "/ml/model-card",
+    response_model=MLModelCardResponse,
+    summary="Retrieve canonical machine learning model card and governance declaration",
+)
+def get_ml_model_card_endpoint() -> MLModelCardResponse:
+    """Retrieve canonical ML model card documenting intended use, evaluation, limitations, and governance."""
+    return MLModelCardResponse(**{
+        "model_name": "CandidateInteractionClassifier_v1.1",
+        "model_version": "v1.1",
+        "feature_version": "v1.1",
+        "dataset_version": "v1.1",
+        "model_family": "Standardized L2-Regularized Logistic Regression",
+        "target_definition": {
+            "positive_label (y=1)": "Observable anomalous physical interaction pattern warranting human steward review",
+            "negative_label (y=0)": "Nominal racing interaction (clean passes, compliant side-by-side racing)",
+        },
+        "intended_use": "Decision-support candidate interaction ranking for human FIA race stewards.",
+        "prohibited_use": (
+            "Autonomous adjudication, driver guilt prediction, penalty assignment, liability determination, "
+            "or sporting sanctions."
+        ),
+        "training_data": {
+            "circuits": ["Monza", "Red Bull Ring"],
+            "season": 2024,
+            "total_supervised_samples": 17,
+            "positive_cases": 5,
+            "nominal_controls": 12,
+            "excluded_unverified": 2,
+        },
+        "label_provenance": "Official FIA Stewards Documents and official Race Control notices.",
+        "calibration_status": "INSUFFICIENT_DATA",
+        "season_generalization": "INSUFFICIENT_DATA",
+        "limitations": [
+            "Sample volume (N=17) represents an empirical prototype cohort.",
+            "Probabilities reflect interaction pattern resemblance, not statistical confidence of rule breach.",
+            "Evaluated across 2 circuits; generalization to all circuits cannot be claimed.",
+        ],
+        "deployment_status": "PROTOTYPE_DECISION_SUPPORT",
+        "non_adjudication_statement": "This is an evidence-support model, not an automated steward.",
+    })
+
+
 
 
 @router.get(
