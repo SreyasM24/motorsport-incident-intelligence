@@ -1205,6 +1205,8 @@ export interface WorkspaceEvidenceItem {
   source: string;
   availability: TriageAvailability;
   quality: string;
+  qualityLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
+  uncertaintyEnvelope?: string | null;
   timestamp?: string | null;
   relevance: string;
   provenance: string;
@@ -1226,6 +1228,8 @@ export interface WorkspaceTimelineEvent {
   description: string;
   measurement?: string | null;
   uncertainty?: string | null;
+  timestampUncertainty?: string | null;
+  spatialUncertainty?: string | null;
   provenance: string;
   evidenceRef?: string | null;
 }
@@ -1237,6 +1241,9 @@ export interface WorkspaceDiscrepancyItem {
   discrepancyType: string;
   magnitude: string;
   uncertainty: string;
+  combinedUncertainty?: string | null;
+  isDistinguishable?: boolean;
+  significanceAssessment?: string | null;
   explanation: string;
   severity: string;
   status: DiscrepancyStatus;
@@ -1270,6 +1277,8 @@ export interface StewardCaseWorkspace {
   case: WorkspaceCaseInfo;
   incidentSummary: WorkspaceIncidentSummary;
   evidenceSummary: Record<string, WorkspaceEvidenceStreamSummary>;
+  reviewFocus?: string[];
+  evidenceQualityMatrix?: Record<string, any>;
   evidenceItems: WorkspaceEvidenceItem[];
   timeline: WorkspaceTimelineEvent[];
   discrepancies: WorkspaceDiscrepancyItem[];
@@ -1278,4 +1287,5 @@ export interface StewardCaseWorkspace {
   review: WorkspaceReviewSummary;
   doctrine: string;
 }
+
 

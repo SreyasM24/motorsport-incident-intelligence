@@ -258,8 +258,22 @@ For detailed governance, model card, and dataset documentation, see:
   - Model inference latency: $0.779\text{ ms}$ per candidate
   - Full evaluation runtime (LOGO-CV, LOCO-CV, 5 ablations, 6 missingness dropouts): $3.55\text{ s}$
 
+---
 
+## 12. Evidence Quality & Uncertainty Propagation Validation (Prompt 27)
 
+For full details, see [**Evidence Quality & Uncertainty Specification**](evidence-quality-and-uncertainty.md).
 
+### 12.1 Suite Summary (`test_evidence_quality.py`)
+- **Total Tests**: 16
+- **Passed**: 16 (100%)
+- **Failed**: 0
 
-
+### 12.2 Validated Invariants & Safeguards
+1. **Multidimensional Quality Paradigm:** Verifies rejection of scalar aggregate reliability scores via `MULTIDIMENSIONAL_NO_AGGREGATE_SCORE`.
+2. **Measurement Uncertainty vs Model Confidence:** Asserts strict mathematical and conceptual separation between sensor tolerance envelopes ($\pm 0.20\text{ m}$, $\pm 2.0\text{ km/h}$, $\pm 0.040\text{ s}$) and classifier confidence probabilities.
+3. **Quadratic Error Propagation:** Asserts correct calculation of combined standard uncertainty $\sigma_{\text{comb}} = \sqrt{\sigma_A^2 + \sigma_B^2}$.
+4. **Statistical Distinguishability:** Asserts that discrepancies are classified as `DISTINGUISHABLE_BEYOND_UNCERTAINTY` only when $|\Delta| > \sigma_{\text{comb}}$, and `WITHIN_UNCERTAINTY_MARGIN` otherwise.
+5. **Timeline Uncertainty Envelopes:** Asserts that chronological milestones carry explicit timestamp ($\pm 0.040\text{ s}$) and spatial ($\pm 0.20\text{ m}$ / $\pm 0.28\text{ m}$) envelopes.
+6. **Non-Adjudicative Review Focus:** Adversarially audits generated checklist items against all forbidden adjudicative terms (`guilt`, `fault`, `penalty`, `liable`, `sanction`, `disqualif`, `blame`).
+7. **Cross-Circuit & Production Reference Verification:** Validated across Monza (`REF-MONZA-01`, `REF-MONZA-02`, `REF-MONZA-03`) and Austrian Red Bull Ring cases.

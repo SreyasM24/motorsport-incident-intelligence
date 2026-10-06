@@ -64,6 +64,36 @@ class DiscrepancySeverity(str, Enum):
     UNRESOLVED = "UNRESOLVED"
 
 
+class EvidenceQualityLevel(str, Enum):
+    """Epistemic quality rating for empirical measurements and derivations."""
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+    UNKNOWN = "UNKNOWN"
+
+
+class EvidenceAvailabilityLevel(str, Enum):
+    """Rigorous availability rating without zero-imputation distortion."""
+    FULL = "FULL"
+    PARTIAL = "PARTIAL"
+    LIMITED = "LIMITED"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
+class UncertaintySpecification(BaseModel):
+    """Explicit measurement or derivation uncertainty envelope."""
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    value: Optional[float] = None
+    unit: Optional[str] = None
+    tolerance_bounds: Optional[str] = None
+    method: str = "EMPIRICAL_SENSOR"
+    is_distinguishable: Optional[bool] = None
+    confidence_basis: Optional[str] = None
+
+
+
 # ==============================================================================
 # 2. CANONICAL EVIDENCE ITEM & LINEAGE CONTRACTS
 # ==============================================================================
@@ -83,6 +113,8 @@ class EvidenceItem(BaseModel):
     timestamp: Optional[str] = None
     event_relative_time_sec: Optional[float] = None
     confidence_or_quality: Optional[str] = None
+    quality_level: EvidenceQualityLevel = EvidenceQualityLevel.HIGH
+    uncertainty: Optional[UncertaintySpecification] = None
     measurement_basis: str = Field(
         default="EMPIRICAL_SENSOR",
         description="e.g. SENSOR_ECU_CAN, 2D_CARTESIAN_RESAMPLED, BOUNDED_2D_PROJECTION, REGULATION_TEXT",
@@ -129,6 +161,9 @@ class CrossModalDiscrepancy(BaseModel):
     metric: str
     observed_difference: str
     expected_tolerance: str
+    combined_uncertainty: Optional[str] = None
+    is_distinguishable: bool = True
+    significance_assessment: Optional[str] = None
     severity: DiscrepancySeverity
     status: str = "OPEN"
     explanation: str
@@ -169,6 +204,8 @@ class NormalizedTimelineEvent(BaseModel):
     evidence_status: EvidenceStatus
     provenance: str
     evidence_ref: Optional[str] = None
+    timestamp_uncertainty_sec: float = 0.040
+    spatial_uncertainty_m: Optional[float] = None
 
 
 class DescriptiveRegulationLink(BaseModel):
@@ -222,6 +259,9 @@ class StewardEvidenceDossier(BaseModel):
     reviewer_id: Optional[str] = None
     review_notes: Optional[str] = None
 
+    # Deterministic Steward Review Focus (Prompt 27 - zero adjudication)
+    review_focus: List[str] = Field(default_factory=list)
+
     # Unified Chronological Timeline
     timeline: List[NormalizedTimelineEvent] = Field(default_factory=list)
 
@@ -230,6 +270,9 @@ class StewardEvidenceDossier(BaseModel):
 
     # Stream Quality Assessments
     stream_quality: List[EvidenceQualityRecord] = Field(default_factory=list)
+
+    # Multidimensional Evidence Quality Matrix
+    evidence_quality_matrix: Optional[Dict[str, Any]] = None
 
     # Cross-Modal Consistency & Consensus (No single composite AI score)
     cross_modal_consistency: ConsistencyStatus
@@ -269,11 +312,15 @@ __all__ = [
     "DescriptiveRegulationLink",
     "DiscrepancySeverity",
     "DossierExportPayload",
+    "EvidenceAvailabilityLevel",
     "EvidenceConsensus",
     "EvidenceItem",
+    "EvidenceQualityLevel",
     "EvidenceQualityRecord",
     "EvidenceStatus",
     "EvidenceType",
     "NormalizedTimelineEvent",
     "StewardEvidenceDossier",
+    "UncertaintySpecification",
 ]
+

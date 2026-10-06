@@ -227,6 +227,8 @@ class IncidentReconstructionEngine:
             "REF-MONZA-01": (2024, "Italian Grand Prix", "Race", "RIC", "HUL", 1),
             "REF-MONZA-02": (2024, "Italian Grand Prix", "Race", "HUL", "TSU", 4),
             "REF-MONZA-03": (2024, "Italian Grand Prix", "Race", "MAG", "GAS", 19),
+            "REF-AUSTRIA-01": (2024, "Austrian Grand Prix", "Race", "NOR", "VER", 64),
+            "REF-AUSTRIA-02": (2024, "Austrian Grand Prix", "Race", "PER", "PIA", 66),
         }
 
         if candidate_id in ref_map:

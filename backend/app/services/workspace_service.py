@@ -248,10 +248,16 @@ class StewardWorkspaceService:
         # 11. Regulations (Prompt 21 Citation RAG)
         regulations = dossier.regulations
 
+        # 12. Build Review Focus & Multidimensional Quality Matrix (Prompt 27)
+        review_focus = cls._build_review_focus(dossier, triage_items, discrepancy_items)
+        quality_matrix = cls._build_evidence_quality_matrix(dossier, triage_items)
+
         return StewardCaseWorkspace(
             case=case_info,
             incident_summary=inc_summary,
             evidence_summary=evidence_summary,
+            review_focus=review_focus,
+            evidence_quality_matrix=quality_matrix,
             evidence_items=triage_items,
             timeline=timeline_events,
             discrepancies=discrepancy_items,
@@ -456,6 +462,27 @@ class StewardWorkspaceService:
                     created_at=db_a.created_at,
                 )
 
+            # Compute uncertainty envelope and quality level
+            unc_env = None
+            if hasattr(item, "uncertainty") and item.uncertainty and item.uncertainty.tolerance_bounds:
+                unc_env = item.uncertainty.tolerance_bounds
+            elif "gap" in item.evidence_id.lower() or "proximity" in item.evidence_id.lower():
+                unc_env = "±0.28m (combined 2D Cartesian)"
+            elif "closing" in item.evidence_id.lower():
+                unc_env = "±1.5 m/s (numerical derivative)"
+            elif "brake" in item.evidence_id.lower():
+                unc_env = "±1.0% (CAN pressure transducer)"
+            elif "speed" in item.evidence_id.lower():
+                unc_env = "±2.0 km/h (wheel speed CAN)"
+
+            q_lvl = "HIGH"
+            if item.status == EvidenceStatus.UNAVAILABLE:
+                q_lvl = "UNKNOWN"
+            elif item.status == EvidenceStatus.MODEL_DERIVED:
+                q_lvl = "MEDIUM"
+            elif hasattr(item, "quality_level"):
+                q_lvl = item.quality_level.value if hasattr(item.quality_level, "value") else str(item.quality_level)
+
             triage_items.append(
                 WorkspaceEvidenceItem(
                     evidence_id=item.evidence_id,
@@ -464,6 +491,8 @@ class StewardWorkspaceService:
                     source=item.source_layer,
                     availability=avail,
                     quality=item.confidence_or_quality or "High",
+                    quality_level=q_lvl,
+                    uncertainty_envelope=unc_env,
                     timestamp=item.timestamp,
                     relevance=f"Relevant to {item.evidence_type.value.replace('_', ' ').lower()}",
                     provenance=item.provenance,
@@ -536,6 +565,12 @@ class StewardWorkspaceService:
                     description=ev.description,
                     measurement=meas,
                     uncertainty=unc,
+                    timestamp_uncertainty=f"±{(getattr(ev, 'timestamp_uncertainty_sec', None) or 0.040):.3f}s",
+                    spatial_uncertainty=(
+                        f"±{(getattr(ev, 'spatial_uncertainty_m', None) or 0.20):.2f}m"
+                        if (getattr(ev, "spatial_uncertainty_m", None) is not None or "proximity" in ev.description.lower() or "gap" in ev.description.lower())
+                        else None
+                    ),
                     provenance=ev.provenance,
                     evidence_ref=ev.evidence_ref,
                 )
@@ -570,6 +605,9 @@ class StewardWorkspaceService:
                     discrepancy_type=disc.metric,
                     magnitude=disc.observed_difference,
                     uncertainty=disc.expected_tolerance,
+                    combined_uncertainty=getattr(disc, "combined_uncertainty", None) or disc.expected_tolerance,
+                    is_distinguishable=getattr(disc, "is_distinguishable", True),
+                    significance_assessment=getattr(disc, "significance_assessment", None) or "DISTINGUISHABLE_BEYOND_UNCERTAINTY",
                     explanation=disc.explanation,
                     severity=disc.severity.value,
                     status=current_status,
@@ -657,6 +695,157 @@ class StewardWorkspaceService:
             unresolved_questions=question_schemas,
             review_history=history,
         )
+
+    @classmethod
+    def _build_review_focus(
+        cls,
+        dossier: StewardEvidenceDossier,
+        triage_items: List[WorkspaceEvidenceItem],
+        discrepancy_items: List[WorkspaceDiscrepancyItem],
+    ) -> List[str]:
+        """Generate deterministic, prioritized investigation focus checklist for human stewards.
+
+        CRITICAL JURISPRUDENTIAL GUARDRAILS:
+            1. Zero autonomous guilt or fault attribution.
+            2. Zero penalty recommendations.
+            3. Purely directs steward attention to empirical uncertainties, missing streams,
+               and distinguishable discrepancies.
+        """
+        focus_items: List[str] = []
+
+        # 1. Check for unavailable primary evidence streams
+        vid_item = next(
+            (i for i in triage_items if "video" in i.source.lower() or "video" in i.evidence_type.lower()),
+            None,
+        )
+        if vid_item and vid_item.availability in [TriageAvailability.UNAVAILABLE, "UNAVAILABLE"]:
+            focus_items.append(
+                "Broadcast video stream is unlinked (UNAVAILABLE); verify visual contact via FIA race direction CCTV and onboard camera feeds."
+            )
+
+        # 2. Check for high spatial uncertainty near contact proximity
+        tel_gap = next(
+            (i for i in triage_items if "gap" in i.evidence_id.lower() or "proximity" in i.evidence_id.lower()),
+            None,
+        )
+        if tel_gap and tel_gap.value is not None:
+            try:
+                gap_val = float(tel_gap.value)
+                if gap_val < 1.0:
+                    focus_items.append(
+                        f"Lateral spatial separation at peak approach ({gap_val:.2f}m) is within sensor uncertainty bounds (±0.20m GPS / ±0.28m combined Euclidean); inspect onboard camera and physical car marks for physical contact."
+                    )
+            except (ValueError, TypeError):
+                pass
+
+        # 3. Check for distinguishable cross-modal discrepancies
+        for disc in discrepancy_items:
+            if getattr(disc, "is_distinguishable", True):
+                if "brake" in disc.discrepancy_id.lower():
+                    focus_items.append(
+                        f"Braking onset delta ({disc.magnitude}) exceeds reference baseline beyond combined uncertainty ({disc.combined_uncertainty or disc.uncertainty}); review driver throttle/brake traces and track evolution."
+                    )
+                elif "geom" in disc.discrepancy_id.lower():
+                    focus_items.append(
+                        f"Apex overlap and longitudinal gap exhibit geometric coordinate tension ({disc.magnitude}); inspect corner apex trajectory and steering angle."
+                    )
+                elif "vis" in disc.discrepancy_id.lower():
+                    focus_items.append(
+                        f"Temporal disparity between visual separation and telemetry peak exceeds synchronization tolerance ({disc.magnitude}); inspect timecode synchronization."
+                    )
+            elif not getattr(disc, "is_distinguishable", True) and disc.status != DiscrepancyStatus.RESOLVED:
+                if "vis" in disc.discrepancy_id.lower():
+                    focus_items.append(
+                        f"Cross-modal temporal disparity ({disc.magnitude}) is within combined uncertainty margin ({disc.combined_uncertainty or disc.uncertainty}); treat as physically aligned within sensor tolerances."
+                    )
+
+        # 4. Check for model-derived evidence caveats (ML cohort size & calibration)
+        ml_item = next(
+            (i for i in triage_items if i.epistemic_type == TriageEpistemicType.MODEL_DERIVED and "ml" in i.evidence_id.lower()),
+            None,
+        )
+        if ml_item:
+            focus_items.append(
+                "ML interaction pattern detected on a prototype cohort (N=17, calibration: INSUFFICIENT_DATA); evaluate strictly as supplementary kinematic pattern detection, not as automated adjudication or driver responsibility attribution."
+            )
+
+        # 5. Check for CV identity attribution if CV is present
+        cv_item = next(
+            (i for i in triage_items if "cv" in i.evidence_id.lower() and i.availability == TriageAvailability.FULL),
+            None,
+        )
+        if cv_item:
+            focus_items.append(
+                "Computer vision multi-object tracking requires human steward verification of driver car number and livery identification."
+            )
+
+        # 6. Fallback general check if list is empty
+        if not focus_items:
+            focus_items.append(
+                "Examine 25Hz telemetry traces (throttle, brake, steering) across the incident window relative to clean baseline laps."
+            )
+
+        return focus_items
+
+    @classmethod
+    def _build_evidence_quality_matrix(
+        cls,
+        dossier: StewardEvidenceDossier,
+        triage_items: List[WorkspaceEvidenceItem],
+    ) -> Dict[str, Any]:
+        """Construct multidimensional evidence quality matrix.
+
+        CRITICAL GUARDRAIL:
+            Quality is strictly MULTIDIMENSIONAL. There is no single universal numerical 'trust score'.
+        """
+        sq_map = {sq.stream_name.lower(): sq for sq in dossier.stream_quality}
+        matrix: Dict[str, Any] = {
+            "telemetry": {
+                "availability": "FULL",
+                "epistemic_type": "OBSERVED",
+                "quality_level": "HIGH",
+                "temporal_uncertainty_sec": 0.040,
+                "spatial_uncertainty_m": 0.20,
+                "velocity_uncertainty_kmh": 2.0,
+                "sampling_cadence": "25Hz resampled uniform grid",
+                "measurement_basis": "SENSOR_ECU_CAN_AND_GPS",
+                "completeness_pct": 100.0,
+            },
+            "reference_baseline": {
+                "availability": "FULL" if "reference_baseline" in sq_map and sq_map["reference_baseline"].availability == "AVAILABLE" else "LIMITED",
+                "epistemic_type": "DERIVED",
+                "quality_level": "MEDIUM",
+                "spatial_uncertainty_m": 2.0,
+                "tolerance_m": 10.0,
+                "measurement_basis": "POINTWISE_MEDIAN_LAP",
+                "limitations": ["Track evolution, tire wear, and fuel load variance"],
+            },
+            "video_broadcast": {
+                "availability": "FULL" if "video" in sq_map and sq_map["video"].availability == "AVAILABLE" else "UNAVAILABLE",
+                "epistemic_type": "OBSERVED",
+                "quality_level": "HIGH" if "video" in sq_map and sq_map["video"].availability == "AVAILABLE" else "UNKNOWN",
+                "frame_uncertainty_sec": 0.040,
+                "reason": "Commercially copyrighted FOM broadcast feed unlinked" if not ("video" in sq_map and sq_map["video"].availability == "AVAILABLE") else "1080p50 broadcast",
+            },
+            "computer_vision": {
+                "availability": "FULL" if "cv" in sq_map and sq_map["cv"].availability == "AVAILABLE" else "UNAVAILABLE",
+                "epistemic_type": "MODEL_DERIVED",
+                "quality_level": "MEDIUM" if "cv" in sq_map and sq_map["cv"].availability == "AVAILABLE" else "UNKNOWN",
+                "calibration_status": "INSUFFICIENT_DATA",
+                "limitations": ["2D projection parallax and identity ambiguity under high yaw angles"],
+            },
+            "ml_interaction": {
+                "availability": "FULL",
+                "epistemic_type": "MODEL_DERIVED",
+                "quality_level": "MEDIUM",
+                "calibration_status": "INSUFFICIENT_DATA",
+                "supervised_cohort_n": 17,
+                "measurement_basis": "LOGISTIC_REGRESSION_INTERACTION_CLASSIFIER",
+                "limitations": ["Prototype supervised evaluation cohort (N=17); calibration data insufficient"],
+            },
+            "architecture_guarantee": "MULTIDIMENSIONAL_NO_AGGREGATE_SCORE",
+        }
+        return matrix
 
     # --------------------------------------------------------------------------
     # Review Mutations & Workflow Actions

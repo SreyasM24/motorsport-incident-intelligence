@@ -206,5 +206,32 @@ When stewards inspect `MODEL_DERIVED` items in the dossier:
 4. **Strict Identity Invariance**:
    - Stewards are assured that driver identities, team names, championship standings, and previous penalties have zero mathematical impact on the model score.
 
+---
+
+## 8. Evidence Quality, Uncertainty Propagation & Steward Review Focus (Prompt 27)
+
+Stewards investigate incidents under rigorous physical sensor limits and multidimensional quality guarantees:
+
+1. **Sensor Precision & Uncertainty Bounds**:
+   - GPS Cartesian coordinates: $\pm 0.20\text{ m}$.
+   - Euclidean minimum gap: $\pm 0.28\text{ m}$ ($\sqrt{4 \times 0.20^2}$).
+   - Wheel speed: $\pm 2.0\text{ km/h}$.
+   - Timecode epoch: $\pm 0.040\text{ s}$ (25 Hz sampling).
+   - Clean reference baseline braking onset delta: $\pm 10.2\text{ m}$.
+
+2. **Statistical Distinguishability for Discrepancies**:
+   - Combined standard uncertainty $\sigma_{\text{comb}} = \sqrt{\sigma_A^2 + \sigma_B^2}$ is evaluated for every discrepancy.
+   - Differences exceeding $\sigma_{\text{comb}}$ are flagged as `DISTINGUISHABLE_BEYOND_UNCERTAINTY` (warranting steward attention).
+   - Differences within $\sigma_{\text{comb}}$ are flagged as `WITHIN_UNCERTAINTY_MARGIN` (sensor noise; treat streams as physically aligned).
+
+3. **Doctrine of Multidimensional Quality**:
+   - The platform enforces `MULTIDIMENSIONAL_NO_AGGREGATE_SCORE`.
+   - Safety-critical adjudication strictly rejects single scalar "reliability scores" (e.g., 87%) to avoid obscuring localized sensor failures.
+
+4. **Deterministic Steward Review Focus**:
+   - Formulates an empirical inspection checklist highlighting physical contact uncertainty, unlinked broadcast feeds, and prototype ML cohort constraints ($N=17$, uncalibrated).
+   - Zero automated guilt, zero fault attribution, zero penalty recommendations.
+
+
 
 

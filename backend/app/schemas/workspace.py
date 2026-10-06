@@ -205,6 +205,8 @@ class WorkspaceEvidenceItem(BaseModel):
     relevance: str
     provenance: str
     limitations: List[str] = Field(default_factory=list)
+    quality_level: str = "HIGH"
+    uncertainty_envelope: Optional[str] = None
     discrepancy_status: str = "NONE"
     observation: str
     value: Optional[Any] = None
@@ -229,6 +231,8 @@ class WorkspaceTimelineEvent(BaseModel):
     description: str
     measurement: Optional[str] = None
     uncertainty: Optional[str] = None
+    timestamp_uncertainty: Optional[str] = None
+    spatial_uncertainty: Optional[str] = None
     provenance: str
     evidence_ref: Optional[str] = None
 
@@ -244,6 +248,9 @@ class WorkspaceDiscrepancyItem(BaseModel):
     discrepancy_type: str
     magnitude: str
     uncertainty: str
+    combined_uncertainty: Optional[str] = None
+    is_distinguishable: bool = True
+    significance_assessment: Optional[str] = None
     explanation: str
     severity: str
     status: DiscrepancyStatus = DiscrepancyStatus.OPEN
@@ -293,6 +300,8 @@ class StewardCaseWorkspace(BaseModel):
     case: WorkspaceCaseInfo
     incident_summary: WorkspaceIncidentSummary
     evidence_summary: Dict[str, WorkspaceEvidenceStreamSummary]
+    review_focus: List[str] = Field(default_factory=list)
+    evidence_quality_matrix: Optional[Dict[str, Any]] = None
     evidence_items: List[WorkspaceEvidenceItem] = Field(default_factory=list)
     timeline: List[WorkspaceTimelineEvent] = Field(default_factory=list)
     discrepancies: List[WorkspaceDiscrepancyItem] = Field(default_factory=list)
@@ -304,3 +313,4 @@ class StewardCaseWorkspace(BaseModel):
         "to assist human race stewards. It strictly DOES NOT automate driver guilt, assign fault probabilities, "
         "issue penalties, or make legal adjudications. Human stewards retain exclusive decision authority."
     )
+

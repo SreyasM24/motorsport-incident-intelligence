@@ -52,7 +52,18 @@ class ConsistencyEngine:
         # 2. Reference Baseline Braking Discrepancy Check
         if braking_onset_delta_m is not None:
             supporting.append("REFERENCE_BASELINE")
-            if abs(braking_onset_delta_m) > 15.0:
+            if abs(braking_onset_delta_m) > 10.0:
+                is_dist = abs(braking_onset_delta_m) > 10.2
+                sig_assess = (
+                    "DISTINGUISHABLE_BEYOND_UNCERTAINTY"
+                    if is_dist
+                    else "NOT_CLEARLY_DISTINGUISHABLE_WITHIN_UNCERTAINTY"
+                )
+                sev = (
+                    DiscrepancySeverity.MEDIUM
+                    if abs(braking_onset_delta_m) > 15.0
+                    else DiscrepancySeverity.LOW
+                )
                 discrepancies.append(
                     CrossModalDiscrepancy(
                         discrepancy_id=f"DISC-{candidate_id}-01-BRAKE",
@@ -61,7 +72,10 @@ class ConsistencyEngine:
                         metric="Braking Onset Location Delta",
                         observed_difference=f"{braking_onset_delta_m:+.1f} meters",
                         expected_tolerance="±10.0 meters",
-                        severity=DiscrepancySeverity.MEDIUM,
+                        combined_uncertainty="±10.2 meters (baseline evolution + sensor CAN)",
+                        is_distinguishable=is_dist,
+                        significance_assessment=sig_assess,
+                        severity=sev,
                         status="OPEN",
                         explanation=(
                             f"Incident braking initiation occurred {abs(braking_onset_delta_m):.1f}m "
@@ -84,6 +98,9 @@ class ConsistencyEngine:
                         metric="Apex Longitudinal Alignment",
                         observed_difference=f"{apex_overlap_pct:.1f}% overlap vs {apex_longitudinal_gap_m:.2f}m longitudinal separation",
                         expected_tolerance="Overlap >=50% implies longitudinal gap <= 2.80m",
+                        combined_uncertainty="±0.35 meters / ±5.0% overlap (projection envelope)",
+                        is_distinguishable=True,
+                        significance_assessment="DISTINGUISHABLE_BEYOND_UNCERTAINTY",
                         severity=DiscrepancySeverity.HIGH,
                         status="INVESTIGATING",
                         explanation=(
@@ -106,6 +123,9 @@ class ConsistencyEngine:
                     metric="Visual Video Linkage",
                     observed_difference="Video Stream Unlinked",
                     expected_tolerance="Synchronized Frame-Accurate Timecode",
+                    combined_uncertainty="UNAVAILABLE (Stream Unlinked)",
+                    is_distinguishable=False,
+                    significance_assessment="NOT_APPLICABLE_STREAM_UNAVAILABLE",
                     severity=DiscrepancySeverity.UNRESOLVED,
                     status="UNRESOLVED",
                     explanation=(
@@ -119,7 +139,8 @@ class ConsistencyEngine:
             supporting.append("VIDEO_SYNCHRONIZATION")
             if visual_min_sep_sec is not None:
                 delta_sec = abs(visual_min_sep_sec - telemetry_event_time_sec)
-                if delta_sec > 0.20 + sync_uncertainty_sec:
+                comb_unc_val = 0.20 + sync_uncertainty_sec
+                if delta_sec > comb_unc_val:
                     discrepancies.append(
                         CrossModalDiscrepancy(
                             discrepancy_id=f"DISC-{candidate_id}-04-VIS-DELTA",
@@ -128,6 +149,9 @@ class ConsistencyEngine:
                             metric="Cross-Modal Temporal Disparity",
                             observed_difference=f"{delta_sec:.3f} seconds",
                             expected_tolerance="±0.200 seconds",
+                            combined_uncertainty=f"±{comb_unc_val:.3f} seconds",
+                            is_distinguishable=True,
+                            significance_assessment="DISTINGUISHABLE_BEYOND_UNCERTAINTY",
                             severity=DiscrepancySeverity.HIGH,
                             status="OPEN",
                             explanation=(
@@ -147,6 +171,9 @@ class ConsistencyEngine:
                             metric="Cross-Modal Temporal Disparity",
                             observed_difference=f"{delta_sec:.3f} seconds",
                             expected_tolerance="±0.200 seconds",
+                            combined_uncertainty=f"±{comb_unc_val:.3f} seconds",
+                            is_distinguishable=False,
+                            significance_assessment="NOT_CLEARLY_DISTINGUISHABLE_WITHIN_UNCERTAINTY",
                             severity=DiscrepancySeverity.MEDIUM,
                             status="OPEN",
                             explanation="Temporal disparity is within synchronization uncertainty margin (±0.05s).",

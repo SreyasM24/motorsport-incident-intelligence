@@ -723,6 +723,78 @@ Returns structured model card declaring intended use, prohibited use, target def
 }
 ```
 
+---
 
+## 15. Steward Review Focus & Evidence Quality API (Prompt 27)
 
+### 15.1 Retrieve Prioritized Steward Review Focus
+`GET /api/v1/cases/{candidate_id}/review-focus`
 
+Returns an empirical, prioritized inspection checklist tailored to the candidate without automated verdicts, fault attribution, or penalty recommendations.
+
+**Response `200 OK`**:
+```json
+{
+  "candidate_id": "REF-MONZA-01",
+  "review_focus": [
+    "Broadcast video stream is unlinked (UNAVAILABLE); verify visual contact via FIA race direction CCTV and onboard camera feeds.",
+    "Lateral spatial separation at peak approach (0.42m) is within sensor uncertainty bounds (±0.20m GPS / ±0.28m combined Euclidean); inspect onboard camera and physical car marks for physical contact.",
+    "Braking onset delta (+16.5m) exceeds reference baseline beyond combined uncertainty (±10.2 meters); review driver throttle/brake traces and track evolution.",
+    "ML interaction pattern detected on a prototype cohort (N=17, calibration: INSUFFICIENT_DATA); evaluate strictly as supplementary kinematic pattern detection, not as automated adjudication or driver responsibility attribution."
+  ],
+  "guidance": "STEWARD GUIDANCE: Non-adjudicative deterministic empirical inspection targets. Zero automated guilt, zero fault attribution, zero penalty recommendation."
+}
+```
+
+### 15.2 Retrieve Multidimensional Evidence Quality Matrix
+`GET /api/v1/cases/{candidate_id}/evidence-quality`
+
+Returns independent quality levels, physical measurement uncertainty bounds, availability states, and epistemic classifications for every evidence subsystem.
+
+**Response `200 OK`**:
+```json
+{
+  "candidate_id": "REF-MONZA-01",
+  "doctrine": "MULTIDIMENSIONAL_NO_AGGREGATE_SCORE",
+  "evidence_quality_matrix": {
+    "architecture_guarantee": "MULTIDIMENSIONAL_NO_AGGREGATE_SCORE",
+    "telemetry": {
+      "epistemic_type": "OBSERVED",
+      "availability": "FULL",
+      "quality_level": "HIGH",
+      "sampling_rate_hz": 25.0,
+      "uncertainty_envelope": "±0.20m (GPS) / ±2.0 km/h (speed) / ±0.040s (timecode)",
+      "limitations": []
+    },
+    "geometry": {
+      "epistemic_type": "DERIVED",
+      "availability": "FULL",
+      "quality_level": "HIGH",
+      "uncertainty_envelope": "±0.28m combined Euclidean lateral gap",
+      "limitations": []
+    },
+    "video": {
+      "epistemic_type": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
+      "quality_level": "UNKNOWN",
+      "uncertainty_envelope": "N/A (unlinked commercial stream)",
+      "limitations": [
+        "Commercial FOM broadcast footage not committed or linked.",
+        "Manual inspection required via FIA CCTV or authorized race control feed."
+      ]
+    },
+    "ml_interaction": {
+      "epistemic_type": "MODEL_DERIVED",
+      "availability": "FULL",
+      "quality_level": "MEDIUM",
+      "supervised_cohort_n": 17,
+      "calibration_status": "INSUFFICIENT_DATA",
+      "uncertainty_envelope": "±0.15 classification margin",
+      "limitations": [
+        "Prototype supervised evaluation cohort (N=17).",
+        "Probability calibration is uncalibrated due to sample size."
+      ]
+    }
+  }
+}
+```

@@ -162,6 +162,20 @@ export const DiscrepancyInvestigationPanel: React.FC<DiscrepancyInvestigationPan
                     <span className="text-white/40">Sensor Uncertainty / Expected:</span>{' '}
                     <strong className="text-white">{disc.uncertainty}</strong>
                   </div>
+                  {((disc as any).combinedUncertainty || (disc as any).combined_uncertainty) && (
+                    <div>
+                      <span className="text-white/40">Combined Uncertainty:</span>{' '}
+                      <strong className="text-amber-400">{(disc as any).combinedUncertainty || (disc as any).combined_uncertainty}</strong>
+                    </div>
+                  )}
+                  {((disc as any).significanceAssessment || (disc as any).significance_assessment) && (
+                    <div>
+                      <span className="text-white/40">Distinguishability:</span>{' '}
+                      <strong className={((disc as any).isDistinguishable ?? (disc as any).is_distinguishable ?? true) ? "text-amber-400" : "text-emerald-400"}>
+                        {((disc as any).significanceAssessment || (disc as any).significance_assessment).replace(/_/g, ' ')}
+                      </strong>
+                    </div>
+                  )}
                 </div>
 
                 {/* Status Update & Human Notes Form */}

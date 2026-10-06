@@ -19,11 +19,13 @@ from app.evidence.synthesis.contracts import (
     DossierExportPayload,
     EvidenceConsensus,
     EvidenceItem,
+    EvidenceQualityLevel,
     EvidenceQualityRecord,
     EvidenceStatus,
     EvidenceType,
     NormalizedTimelineEvent,
     StewardEvidenceDossier,
+    UncertaintySpecification,
 )
 from app.evidence.synthesis.lineage import LineageTracker
 from app.schemas.incident import IncidentTimelineMilestoneSchema
@@ -607,7 +609,42 @@ class StewardDossierSynthesizer:
         except Exception:
             historical_comparable = None
 
-        # 8. Assemble Master Steward Evidence Dossier
+        # 8. Deterministic Steward Review Focus (Prompt 27)
+        dossier_review_focus: List[str] = []
+        is_cv_active = (
+            cv_analysis is not None
+            and getattr(cv_analysis, "processing_status", None) == CVProcessingStatus.AVAILABLE
+            and getattr(cv_analysis, "sampled_frame_count", 0) > 0
+        )
+        if not is_cv_active:
+            dossier_review_focus.append(
+                "Broadcast video stream is unlinked (UNAVAILABLE); verify visual contact via FIA race direction CCTV and onboard camera feeds."
+            )
+        if tel.minimum_gap_meters < 1.0:
+            dossier_review_focus.append(
+                f"Lateral spatial separation at peak approach ({tel.minimum_gap_meters:.2f}m) is within sensor uncertainty bounds (±0.20m GPS / ±0.28m combined Euclidean); inspect onboard camera and physical car marks for physical contact."
+            )
+        for disc in discrepancies:
+            if getattr(disc, "is_distinguishable", True):
+                if "brake" in disc.discrepancy_id.lower():
+                    dossier_review_focus.append(
+                        f"Braking onset delta ({disc.observed_difference}) exceeds reference baseline beyond combined uncertainty ({disc.combined_uncertainty or disc.expected_tolerance}); review driver throttle/brake traces and track evolution."
+                    )
+                elif "geom" in disc.discrepancy_id.lower():
+                    dossier_review_focus.append(
+                        f"Apex overlap and longitudinal gap exhibit geometric coordinate tension ({disc.observed_difference}); inspect corner apex trajectory and steering angle."
+                    )
+                elif "vis" in disc.discrepancy_id.lower():
+                    dossier_review_focus.append(
+                        f"Temporal disparity between visual separation and telemetry peak exceeds synchronization tolerance ({disc.observed_difference}); inspect timecode synchronization."
+                    )
+
+        if not dossier_review_focus:
+            dossier_review_focus.append(
+                "Examine 25Hz telemetry traces (throttle, brake, steering) across the incident window relative to clean baseline laps."
+            )
+
+        # 9. Assemble Master Steward Evidence Dossier
         return StewardEvidenceDossier(
             dossier_id=f"STEWARD-DOSSIER-{cid}",
             candidate_id=cid,
@@ -628,6 +665,7 @@ class StewardDossierSynthesizer:
             review_status=review_status,
             reviewer_id=reviewer_id,
             review_notes=review_notes,
+            review_focus=dossier_review_focus,
             timeline=normalized_timeline,
             evidence_items=evidence_items,
             stream_quality=quality_records,

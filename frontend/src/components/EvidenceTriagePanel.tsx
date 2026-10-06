@@ -250,6 +250,16 @@ export const EvidenceTriagePanel: React.FC<EvidenceTriagePanelProps> = ({
                         <div className="text-[11px] text-white/80">
                           <span className="text-white/40">Data Quality:</span> {item.quality}
                         </div>
+                        {item.uncertaintyEnvelope && (
+                          <div className="text-[11px] text-amber-400/90 font-mono">
+                            <span className="text-white/40">Uncertainty Bounds:</span> {item.uncertaintyEnvelope}
+                          </div>
+                        )}
+                        {item.qualityLevel && (
+                          <div className="text-[11px] text-white/80">
+                            <span className="text-white/40">Quality Level:</span> {item.qualityLevel}
+                          </div>
+                        )}
                         {item.timestamp && (
                           <div className="text-[11px] text-white/80">
                             <span className="text-white/40">Timestamp:</span> {item.timestamp}

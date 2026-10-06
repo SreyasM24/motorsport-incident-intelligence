@@ -296,6 +296,7 @@ motorsport-incident-intelligence/
 │   ├── api.md
 │   ├── data-provenance.md
 │   ├── evaluation.md
+│   ├── evidence-quality-and-uncertainty.md # Evidence quality & uncertainty propagation
 │   ├── ml-model-card.md      # ML interaction model card & governance declaration
 │   ├── ml-dataset-card.md    # Multi-circuit dataset manifest card & provenance
 │   ├── end-to-end-validation.md # E2E steward replay & invariant validation

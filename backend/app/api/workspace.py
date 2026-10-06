@@ -178,3 +178,41 @@ def get_case_audit_trail_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve audit trail for '{candidate_id}': {str(e)}",
         )
+
+
+@router.get(
+    "/{candidate_id}/review-focus",
+    summary="Retrieve prioritized investigation checklist for human stewards",
+)
+def get_case_review_focus_endpoint(
+    candidate_id: str,
+    db: Session = Depends(get_db),
+):
+    """Retrieve deterministic steward inspection targets without automated guilt or penalties."""
+    ws = get_case_workspace_endpoint(candidate_id=candidate_id, db=db)
+    return {
+        "candidate_id": candidate_id,
+        "review_focus": ws.review_focus,
+        "guidance": (
+            "STEWARD GUIDANCE: Non-adjudicative deterministic empirical inspection targets. "
+            "Zero automated guilt, zero fault attribution, zero penalty recommendation."
+        ),
+    }
+
+
+@router.get(
+    "/{candidate_id}/evidence-quality",
+    summary="Retrieve multidimensional evidence quality and uncertainty matrix",
+)
+def get_case_evidence_quality_endpoint(
+    candidate_id: str,
+    db: Session = Depends(get_db),
+):
+    """Retrieve multidimensional quality, uncertainty, and availability matrix across evidence streams."""
+    ws = get_case_workspace_endpoint(candidate_id=candidate_id, db=db)
+    return {
+        "candidate_id": candidate_id,
+        "evidence_quality_matrix": ws.evidence_quality_matrix,
+        "doctrine": "MULTIDIMENSIONAL_NO_AGGREGATE_SCORE",
+    }
+

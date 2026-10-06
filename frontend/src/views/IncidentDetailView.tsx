@@ -564,10 +564,37 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
       )}
 
       {/* ==================================================
-          4G. STEWARD CASE WORKSPACE & EVIDENCE TRIAGE (Prompt 24)
+          4G. STEWARD CASE WORKSPACE & EVIDENCE TRIAGE (Prompt 24/27)
       ================================================== */}
       {caseWorkspace && (
         <>
+          {caseWorkspace.reviewFocus && caseWorkspace.reviewFocus.length > 0 && (
+            <section className="space-y-3 bg-[#0d0d0f] border border-amber-500/20 rounded-sm p-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                  <span className="text-xs font-bold text-white tracking-[0.2em] uppercase font-tech">
+                    STEWARD REVIEW FOCUS (EMPIRICAL INSPECTION CHECKLIST)
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono uppercase bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-xs">
+                  NON-ADJUDICATIVE
+                </span>
+              </div>
+              <div className="text-[10px] font-mono text-white/50">
+                Prioritized deterministic investigation targets based on measurement uncertainty, missing channels, and distinguishable discrepancies.
+              </div>
+              <ul className="space-y-2 pt-1 font-mono text-xs">
+                {caseWorkspace.reviewFocus.map((focusItem, idx) => (
+                  <li key={idx} className="flex items-start gap-2 bg-[#08080a] border border-white/5 p-3 rounded-xs text-white/80">
+                    <span className="text-amber-400 font-bold shrink-0">{idx + 1}.</span>
+                    <span className="leading-relaxed">{focusItem}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <section className="space-y-3">
             <EvidenceTriagePanel
               evidenceItems={caseWorkspace.evidenceItems}
