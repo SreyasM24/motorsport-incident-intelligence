@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
+from app.core.security import verify_steward_auth
 from app.evidence.baseline_models import BaselineEvidence
 from app.schemas.overtake_geometry import OvertakeGeometryEvidence
 from app.schemas.ml_evidence import (
@@ -70,6 +71,7 @@ router = APIRouter(prefix="/analysis", tags=["Analysis & Candidate Reconstructio
 def persist_candidate_endpoint(
     request: CandidatePersistRequest,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ) -> CandidatePersistResponse:
     """Persist an algorithmic candidate event into the database for human steward review.
 
@@ -100,6 +102,7 @@ def persist_candidate_endpoint(
 def persist_bulk_candidates_endpoint(
     request: BulkCandidatePersistRequest,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ) -> BulkCandidatePersistResponse:
     """Execute bounded candidate detection and persist results into review table."""
     try:

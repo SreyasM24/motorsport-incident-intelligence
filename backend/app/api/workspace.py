@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
+from app.core.security import verify_steward_auth
 from app.services.workspace_service import StewardWorkspaceService
 from app.schemas.workspace import (
     DiscrepancyStatusUpdateRequest,
@@ -65,6 +66,7 @@ def record_evidence_acknowledgement_endpoint(
     evidence_id: str,
     payload: EvidenceAcknowledgementCreateRequest,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ) -> EvidenceAcknowledgementSchema:
     """Record that a steward has examined, dismissed, or flagged an evidence item.
 
@@ -87,6 +89,7 @@ def create_unresolved_question_endpoint(
     candidate_id: str,
     payload: UnresolvedQuestionCreateRequest,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ) -> UnresolvedQuestionSchema:
     """Record an open factual or technical question regarding the candidate incident."""
     return StewardWorkspaceService.create_unresolved_question(
@@ -106,6 +109,7 @@ def update_unresolved_question_endpoint(
     question_id: str,
     payload: UnresolvedQuestionUpdateRequest,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ) -> UnresolvedQuestionSchema:
     """Update status (OPEN, RESOLVED, DEFERRED) or append notes to an open question."""
     return StewardWorkspaceService.update_unresolved_question(
@@ -125,6 +129,7 @@ def update_discrepancy_status_endpoint(
     discrepancy_id: str,
     payload: DiscrepancyStatusUpdateRequest,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ):
     """Transition discrepancy status (OPEN, ACKNOWLEDGED, RESOLVED, UNRESOLVED)."""
     return StewardWorkspaceService.update_discrepancy_status(

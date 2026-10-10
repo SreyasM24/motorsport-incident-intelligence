@@ -7,6 +7,7 @@ from sqlalchemy import select
 from app.core.exceptions import ResourceNotFoundException, ValidationException
 from app.core.logging import logger
 from app.database.connection import get_db
+from app.core.security import verify_steward_auth
 from app.evidence.dossier import convert_dossier_to_frontend_incident
 from app.evidence.reconstruction_service import get_reconstruction_engine
 from app.evidence.cv import get_cv_service
@@ -213,6 +214,7 @@ def update_incident_status(
     incident_id: str,
     payload: IncidentStatusUpdate,
     db: Session = Depends(get_db),
+    _auth: bool = Depends(verify_steward_auth),
 ) -> IncidentSummary:
     """Update steward workflow status with strict state machine transition validation."""
     inc = db.get(Incident, incident_id)

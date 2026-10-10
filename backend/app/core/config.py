@@ -2,7 +2,7 @@
 
 import os
 from functools import lru_cache
-from typing import List, Union
+from typing import List, Optional, Union
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -55,6 +55,12 @@ class Settings(BaseSettings):
 
     # Logging
     LOG_LEVEL: str = Field(default="INFO", description="Logging level")
+
+    # Security & Access Control
+    STEWARD_API_KEY: Optional[str] = Field(
+        default=None,
+        description="Optional API key for authenticating steward panel administrative and mutation actions. If unset, runs in open local/development mode.",
+    )
 
     # CORS
     CORS_ORIGINS: List[str] = Field(
