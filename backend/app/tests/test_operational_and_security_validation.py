@@ -188,3 +188,58 @@ def test_workspace_cache_invalidation_semantics(client: TestClient, db_session):
     resp_refresh = client.get("/api/v1/cases/REF-MONZA-01/workspace?force_refresh=true")
     assert resp_refresh.status_code == 200
     assert resp_refresh.json()["case"]["candidateId"] == "REF-MONZA-01"
+
+
+# ==============================================================================
+# 5. NETWORK RESILIENCE, RATE LIMITING & SECURITY HEADERS
+# ==============================================================================
+
+def test_not_found_handling_is_graceful_and_standardized(client: TestClient):
+    """Verify non-existent endpoints and entities return standardized 404 responses."""
+    resp = client.get("/api/v1/incidents/NON_EXISTENT_ID_9999")
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    data = resp.json()
+    assert "error" in data or "detail" in data
+    # Ensure no internal filesystem paths are exposed
+    assert "C:\\" not in resp.text
+    assert "/home/" not in resp.text
+
+
+def test_rate_limiting_protects_expensive_endpoints(client: TestClient):
+    """Verify exceeding rate limit returns 429 Too Many Requests with Retry-After header."""
+    # Reset or saturate expensive endpoint limit (limit is 30 for expensive routes)
+    last_status = 200
+    hit_429 = False
+    for _ in range(40):
+        resp = client.get("/api/v1/analysis/benchmark-nonexistent-rate-check")
+        if resp.status_code == status.HTTP_429_TOO_MANY_REQUESTS:
+            hit_429 = True
+            assert "Retry-After" in resp.headers
+            data = resp.json()
+            assert data["error"]["code"] == "RATE_LIMIT_EXCEEDED"
+            break
+    assert hit_429, "Expected 429 Too Many Requests after 30+ calls within rate limit window"
+
+
+def test_security_headers_present_on_all_responses(client: TestClient):
+    """Verify essential defensive security headers are injected into HTTP responses."""
+    resp = client.get("/api/v1/health")
+    assert resp.status_code == 200
+    assert resp.headers.get("X-Content-Type-Options") == "nosniff"
+    assert resp.headers.get("X-Frame-Options") == "SAMEORIGIN"
+    assert "Referrer-Policy" in resp.headers
+    assert "X-Request-ID" in resp.headers
+
+
+def test_cors_preflight_configuration(client: TestClient):
+    """Verify CORS OPTIONS preflight request behaves according to policy."""
+    resp = client.options(
+        "/api/v1/cases/REF-MONZA-01/workspace",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert resp.status_code in (200, 204)
+    assert resp.headers.get("access-control-allow-origin") == "http://localhost:3000"
+

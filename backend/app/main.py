@@ -22,6 +22,15 @@ async def lifespan(app: FastAPI):
     logger.info(f"CORS Allowed Origins: {settings.CORS_ORIGINS}")
     logger.info(f"FastF1 Cache Directory: {settings.FASTF1_CACHE_DIR}")
 
+    try:
+        from app.database.connection import engine
+        from app.database.base import Base
+        import app.models  # noqa: F401
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database relational metadata verified/created.")
+    except Exception as exc:
+        logger.warning(f"Relational table initialization skipped: {exc}")
+
     yield
 
     logger.info(f"Shutting down {settings.APP_NAME}...")
