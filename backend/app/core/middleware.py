@@ -32,6 +32,20 @@ class RequestTracingAndLoggingMiddleware(BaseHTTPMiddleware):
         return response
 
 
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Injects secure HTTP defense-in-depth headers into all API responses."""
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        response.headers.setdefault("X-XSS-Protection", "1; mode=block")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+        return response
+
+
 class RateLimiterMiddleware(BaseHTTPMiddleware):
     """In-memory sliding-window rate limiter protecting expensive analysis and synthesis routes."""
 
@@ -42,9 +56,13 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         # Mapping: ip -> list of timestamps
         self._clients: Dict[str, list] = {}
 
+    def reset(self) -> None:
+        """Clear rate limiter cache (primarily for test isolation)."""
+        self._clients.clear()
+
     async def dispatch(self, request: Request, call_next) -> Response:
         # Exclude static/health routes from rate limiting
-        if request.url.path.endswith("/live") or request.url.path.endswith("/health"):
+        if any(request.url.path.endswith(p) for p in ("/live", "/health", "/ready")):
             return await call_next(request)
 
         client_ip = request.client.host if request.client else "127.0.0.1"
@@ -56,8 +74,8 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
 
         # Apply stricter limit on expensive endpoints
         path = request.url.path
-        is_expensive = any(sub in path for sub in ("/dossier", "/assistant", "/analysis"))
-        limit = 30 if is_expensive else self.max_requests
+        is_expensive = any(sub in path for sub in ("/dossier", "/assistant", "/analysis", "/replay", "/persist"))
+        limit = min(30, self.max_requests) if is_expensive else self.max_requests
 
         if len(valid_timestamps) >= limit:
             retry_after = int(self.window - (now - valid_timestamps[0])) + 1

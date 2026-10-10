@@ -328,6 +328,9 @@ motorsport-incident-intelligence/
 
 ## 12. License & Legal Disclaimer
 
-`LICENSE_NOT_SELECTED` — All rights reserved. Please contact repository maintainers for licensing and commercial evaluation terms.
+Licensed under the **Apache License, Version 2.0**. See the [LICENSE](LICENSE) file for complete terms.
 
-*Formula 1, F1, and related marks are trademarks of Formula One Licensing B.V. FastF1 and OpenF1 are independent open-source projects not affiliated with Formula One management. All regulatory references refer to publicly available FIA Sporting Codes and International Sporting Code appendices.*
+### Non-Affiliation and Trademark Notice
+Motorsport Incident Intelligence (MII) is an independent engineering and research project and is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Fédération Internationale de l'Automobile (FIA), Formula One World Championship Limited, Formula One Licensing B.V., Formula 1, F1, or any of their subsidiaries or affiliates.
+
+All official Formula 1, F1, and FIA names, marks, emblems, and logos are registered trademarks of their respective owners. Their use herein is for purely descriptive, educational, and nominative fair use purposes. FastF1 and OpenF1 are independent open-source projects not affiliated with Formula One management. Regulatory excerpts cite publicly accessible FIA Sporting Codes and International Sporting Code appendices for factual context.

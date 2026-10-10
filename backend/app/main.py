@@ -51,8 +51,13 @@ def create_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Configure custom tracing and request rate protection middleware
-    from app.core.middleware import RequestTracingAndLoggingMiddleware, RateLimiterMiddleware
+    # Configure custom tracing, security headers, and request rate protection middleware
+    from app.core.middleware import (
+        RequestTracingAndLoggingMiddleware,
+        RateLimiterMiddleware,
+        SecurityHeadersMiddleware,
+    )
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(RequestTracingAndLoggingMiddleware)
     app.add_middleware(RateLimiterMiddleware)
 
